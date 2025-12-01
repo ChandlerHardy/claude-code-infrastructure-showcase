@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(for file in /root/git/claude-code-infrastructure-showcase/.claude/skills/frontend-dev-guidelines/resources/*.md)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(chmod:*)",
+      "Bash(npm install:*)",
+      "Bash(CLAUDE_PROJECT_DIR=/Users/chandlerhardy/repos/claude-code-infrastructure-showcase .claude/hooks/core/skill-activation-prompt.sh:*)"
     ],
     "deny": [],
     "ask": []

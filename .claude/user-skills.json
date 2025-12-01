@@ -1,0 +1,36 @@
+{
+  "userPreferences": {
+    "preferredSkills": ["systematic-debugging", "error-tracking"],
+    "debuggingPreferences": {
+      "preferredMethod": "systematic-debugging",
+      "errorSeverityThreshold": "critical",
+      "enableContentAnalysis": true,
+      "enableGitContext": true
+    },
+    "chessPreferences": {
+      "stockfishDepth": 20,
+      "openingTheoryLevel": "intermediate",
+      "pgnValidation": true,
+      "fenValidation": true
+    },
+    "frontendPreferences": {
+      "componentLibrary": "shadcn/ui",
+      "stylingFramework": "tailwindcss",
+      "stateManagement": "react-hooks"
+    },
+    "backendPreferences": {
+      "apiFramework": "fastapi",
+      "orm": "sqlalchemy",
+      "database": "postgresql",
+      "authenticationMethod": "jwt"
+    },
+    "testingPreferences": {
+      "framework": "pytest",
+      "coverageThreshold": 80,
+      "enableIntegrationTests": true
+    },
+    "overrides": {
+      "skipPrompts": ["git-status", "version-check"],
+      "defaultPriority": "high"
+  }
+}

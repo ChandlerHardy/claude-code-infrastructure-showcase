@@ -1,10 +1,4 @@
 {
-  "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "mysql",
-    "sequential-thinking",
-    "playwright"
-  ],
   "permissions": {
     "allow": [
       "Edit:*",
@@ -16,12 +10,22 @@
     "defaultMode": "acceptEdits"
   },
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/core/dev-docs-branch-init.sh"
+          }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/core/skill-activation-prompt.sh"
           }
         ]
       }
@@ -32,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use-tracker.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/core/post-tool-use-tracker.sh"
           }
         ]
       }
@@ -42,11 +46,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/tsc-check.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/core/dev-docs-stop-hook.sh"
           },
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/trigger-build-resolver.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/optional/tsc-check.sh"
+          },
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/optional/trigger-build-resolver.sh"
           }
         ]
       }
