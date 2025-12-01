@@ -3,9 +3,11 @@
     "allow": [
       "Bash(for file in /root/git/claude-code-infrastructure-showcase/.claude/skills/frontend-dev-guidelines/resources/*.md)",
       "Bash(done)",
-      "Bash(chmod:*)",
       "Bash(npm install:*)",
-      "Bash(CLAUDE_PROJECT_DIR=/Users/chandlerhardy/repos/claude-code-infrastructure-showcase .claude/hooks/core/skill-activation-prompt.sh:*)"
+      "Bash(cat:*)",
+      "Bash(python3:*)",
+      "Bash(.claude/hooks/post-tool-use-tracker.sh)",
+      "Bash(.claude/hooks/trigger-build-resolver.sh:*)"
     ],
     "deny": [],
     "ask": []

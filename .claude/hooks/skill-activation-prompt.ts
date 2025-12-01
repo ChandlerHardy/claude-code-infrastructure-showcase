@@ -41,8 +41,8 @@ async function main() {
         const prompt = data.prompt.toLowerCase();
 
         // Load skill rules
-        const projectDir = process.env.CLAUDE_PROJECT_DIR || '$HOME/project';
-        const rulesPath = join(projectDir, '.claude', 'skill-rules.json');
+        const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+        const rulesPath = join(projectDir, '.claude', 'skills', 'skill-rules.json');
         const rules: SkillRules = JSON.parse(readFileSync(rulesPath, 'utf-8'));
 
         const matchedSkills: MatchedSkill[] = [];

@@ -14,8 +14,9 @@ services_dirs=("email" "exports" "form" "frontend" "projects" "uploads" "users" 
 services_with_changes=()
 
 # Check each service directory for git changes
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 for service in "${services_dirs[@]}"; do
-    service_path="$CLAUDE_PROJECT_DIR/$service"
+    service_path="$PROJECT_DIR/$service"
     echo "Checking service: $service at $service_path" >> /tmp/claude-hook-debug.log
     
     # Check if directory exists and is a git repo
@@ -39,7 +40,8 @@ for service in "${services_dirs[@]}"; do
 done
 
 # Return to original directory
-cd "$CLAUDE_PROJECT_DIR"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+cd "$PROJECT_DIR"
 
 echo "Services with changes: ${services_with_changes[@]}" >> /tmp/claude-hook-debug.log
 
