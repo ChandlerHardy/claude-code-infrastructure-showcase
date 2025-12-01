@@ -209,6 +209,8 @@ dev/
 3. Suggests relevant skills automatically
 4. Skills load only when needed
 
+**⚠️ IMPORTANT**: skill-rules.json **must** be located in `.claude/skills/` directory (not `.claude/`) for the hook to find it.
+
 **This solves the #1 problem** with Claude Code skills: they don't activate on their own.
 
 ### Progressive Disclosure (500-Line Rule)
@@ -268,8 +270,9 @@ Some hooks expect specific structures:
 ### Phase 1: Skill Activation (15 min)
 1. Copy skill-activation-prompt hook
 2. Copy post-tool-use-tracker hook
-3. Update settings.json
-4. Install hook dependencies
+3. **⚠️ CRITICAL**: Copy skill-rules.json to `.claude/skills/` (NOT `.claude/`)
+4. Update settings.json
+5. Install hook dependencies
 
 ### Phase 2: Add First Skill (10 min)
 1. Pick ONE relevant skill

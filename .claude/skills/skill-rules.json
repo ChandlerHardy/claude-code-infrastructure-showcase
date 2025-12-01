@@ -1,0 +1,326 @@
+{
+  "version": "1.0.0",
+  "metadata": {
+    "created": "2025-11-19",
+    "updated": "2025-12-01",
+    "environment": "project-reference",
+    "compatibility": ["claude-code-v1.0+"],
+    "project": "claude-code-infrastructure-showcase"
+  },
+  "skills": {
+    "documentation-maintenance": {
+      "type": "productivity",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Automatic documentation updates and maintenance reminders",
+      "promptTriggers": {
+        "keywords": ["documentation", "docs", "readme", "update", "complete", "finish", "done"],
+        "intentPatterns": [
+          "update.*documentation",
+          "complete.*feature",
+          "finish.*implementation",
+          "wrap.*up.*session",
+          "document.*changes"
+        ]
+      },
+      "fileTriggers": {
+        "patterns": ["**/*.md", "**/*.rst", "dev/**/*"],
+        "contentSignatures": [
+          "TODO|FIXME|HACK",
+          "#.*API",
+          "#.*Documentation",
+          "##.*Implementation",
+          "class.*|^def.*"
+        ]
+      }
+    },
+    "general-development": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "General software development patterns and best practices",
+      "promptTriggers": {
+        "keywords": ["development", "programming", "code", "implementation", "architecture", "testing"],
+        "intentPatterns": [
+          "implement.*feature",
+          "create.*component",
+          "refactor.*code",
+          "add.*test",
+          "design.*architecture"
+        ]
+      },
+      "fileTriggers": {
+        "patterns": ["**/*.{py,js,ts,tsx,jsx,go,java,cpp,rs}"],
+        "contentSignatures": [
+          "function",
+          "class",
+          "import",
+          "export",
+          "def",
+          "const",
+          "let"
+        ]
+      }
+    },
+    "error-tracking": {
+      "type": "observability",
+      "enforcement": "warn",
+      "priority": "critical",
+      "description": "Error tracking and monitoring setup with Sentry patterns",
+      "promptTriggers": {
+        "keywords": ["error", "exception", "bug", "crash", "sentry", "logging", "monitoring", "debug", "trace", "captureException", "performance tracking"],
+        "intentPatterns": [
+          "track.*error",
+          "monitor.*performance",
+          "setup.*logging",
+          "handle.*exception",
+          "debug.*issue",
+          "(add|create|implement|setup).*?(error handling|sentry|error tracking)",
+          "(fix|handle|catch).*?(error|exception)"
+        ]
+      },
+      "fileTriggers": {
+        "patterns": [
+          "**/*.{ts,tsx,py,js}",
+          "*error*",
+          "*log*",
+          "**/instrument.ts",
+          "**/sentry*.ts",
+          "**/*Controller.ts",
+          "**/*Service.ts"
+        ],
+        "contentSignatures": [
+          "try\\s*{",
+          "catch\\s*\\(",
+          "console\\.error",
+          "logging\\.",
+          "sentry\\.",
+          "raise.*Exception",
+          "except.*:",
+          "Error|Exception",
+          "@sentry",
+          "Sentry\\.",
+          "captureException",
+          "captureMessage"
+        ]
+      }
+    },
+    "frontend-dev-guidelines": {
+      "type": "guardrail",
+      "enforcement": "block",
+      "priority": "high",
+      "description": "React/TypeScript best practices including MUI v7 compatibility and modern patterns",
+      "promptTriggers": {
+        "keywords": ["react", "nextjs", "tailwind", "ui", "component", "frontend", "web", "tsx", "MUI", "Material-UI", "Grid", "styling", "interface", "page", "modal", "dialog", "form"],
+        "intentPatterns": [
+          "create.*component",
+          "implement.*react",
+          "setup.*tailwind",
+          "build.*ui",
+          "add.*hook",
+          "(create|add|make|build|update|modify|edit).*?(component|UI|page|modal|dialog|form)",
+          "(style|design|layout).*?(component|UI)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "**/frontend/**/*.{ts,tsx,js,jsx,vue}",
+          "**/web/**/*.{ts,tsx,js,jsx}",
+          "**/src/**/*.{ts,tsx,js,jsx}",
+          "components/**/*",
+          "pages/**/*",
+          "frontend/src/**/*.tsx",
+          "client/src/**/*.tsx"
+        ],
+        "pathExclusions": [
+          "**/*.test.tsx",
+          "**/*.test.ts",
+          "**/*.spec.tsx",
+          "**/*.spec.ts",
+          "**/*.styles.ts",
+          "**/vite.config.ts",
+          "**/tsconfig.json"
+        ],
+        "contentSignatures": [
+          "import.*React",
+          "export default",
+          "useState|useEffect",
+          "className.*=",
+          "tailwind",
+          "from '@mui/material';",
+          "import.*Grid.*from.*@mui",
+          "<Grid ",
+          "Grid2",
+          "Unstable_Grid",
+          "makeStyles",
+          "@material-ui/core"
+        ]
+      },
+      "blockMessage": "⚠️ BLOCKED - Frontend Best Practices Required\n\n📋 REQUIRED ACTION:\n1. Use Skill tool: 'frontend-dev-guidelines'\n2. Review MUI v7 patterns (Grid uses size={{}} prop, NOT xs/sm props)\n3. Check React/TypeScript best practices\n4. Use proper styling patterns\n5. Then retry this edit\n\nReason: Enforce MUI v7 compatibility and React best practices\nFile: {file_path}\n\n💡 TIP: Add '// @skip-validation' comment to skip future checks",
+      "skipConditions": {
+        "sessionSkillUsed": true,
+        "fileMarkers": [
+          "@skip-validation"
+        ],
+        "envOverride": "SKIP_FRONTEND_GUIDELINES"
+      }
+    },
+    "api-development": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "API and backend development patterns for REST, GraphQL, and microservices",
+      "promptTriggers": {
+        "keywords": ["api", "backend", "server", "endpoint", "rest", "graphql", "fastapi", "express", "django"],
+        "intentPatterns": [
+          "create.*api",
+          "implement.*endpoint",
+          "setup.*server",
+          "add.*middleware",
+          "create.*route"
+        ]
+      },
+      "fileTriggers": {
+        "patterns": [
+          "**/api/**/*",
+          "**/backend/**/*",
+          "**/server/**/*",
+          "**/routes/**/*",
+          "**/endpoints/**/*"
+        ],
+        "contentSignatures": [
+          "app\\.(get|post|put|delete)",
+          "@router",
+          "async.*def",
+          "express",
+          "fastapi",
+          "django"
+        ]
+      }
+    },
+    "backend-dev-guidelines": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Specific Node.js/Express/TypeScript patterns with BaseController, Prisma, Zod, and Sentry",
+      "promptTriggers": {
+        "keywords": ["backend", "backend development", "microservice", "controller", "service", "repository", "route", "routing", "express", "API", "endpoint", "middleware", "validation", "Zod", "Prisma", "database access", "BaseController", "dependency injection", "unifiedConfig", "configuration"],
+        "intentPatterns": [
+          "(create|add|implement|build).*?(route|endpoint|API|controller|service|repository)",
+          "(fix|handle|debug).*?(error|exception|backend)",
+          "(add|implement).*?(middleware|validation|error.*?handling)",
+          "(organize|structure|refactor).*?(backend|service|API)",
+          "(how to|best practice).*?(backend|route|controller|service)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "backend/**/*.ts",
+          "api/**/*.ts",
+          "server/**/*.ts",
+          "services/**/*.ts",
+          "**/routes/**/*.ts"
+        ],
+        "pathExclusions": [
+          "**/*.test.ts",
+          "**/*.spec.ts"
+        ],
+        "contentPatterns": [
+          "router\\.",
+          "app\\.(get|post|put|delete|patch)",
+          "export.*Controller",
+          "export.*Service",
+          "prisma\\."
+        ]
+      }
+    },
+    "skill-developer": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "medium",
+      "description": "Meta-skill for creating and managing Claude Code skills",
+      "promptTriggers": {
+        "keywords": ["skill system", "create skill", "add skill", "skill triggers", "skill rules", "hook system", "skill development", "skill-rules.json"],
+        "intentPatterns": [
+          "(how do|how does|explain).*?skill",
+          "(create|add|modify|build).*?skill",
+          "skill.*?(work|trigger|activate|system)"
+        ]
+      }
+    },
+    "route-tester": {
+      "type": "domain",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Testing authenticated API routes with JWT cookie-based auth",
+      "promptTriggers": {
+        "keywords": ["test route", "test endpoint", "test API", "route testing", "API testing", "authenticated route", "JWT testing", "cookie auth", "test with auth"],
+        "intentPatterns": [
+          "(test|debug|verify).*?(route|endpoint|API)",
+          "(how to|how do I).*?test.*?(route|endpoint|API)",
+          "test.*?(authenticated|auth|JWT|cookie)"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": [
+          "**/routes/**/*.ts",
+          "**/test-*.js",
+          "**/test-*.ts"
+        ],
+        "contentPatterns": [
+          "router\\.(get|post|put|delete|patch)",
+          "app\\.(get|post|put|delete|patch)"
+        ]
+      }
+    }
+  },
+  "skipMechanisms": {
+    "commentTriggers": [
+      "// @skip-skill-check",
+      "# skip-skill-check",
+      "/* skip-skill-check */",
+      "<!-- skip-skill-check -->"
+    ],
+    "envVars": {
+      "CLAUDE_SKIP_SKILLS": "all",
+      "CLAUDE_ENFORCEMENT_LEVEL": "suggest|warn|block"
+    },
+    "workspaceContext": {
+      "skipInTests": true,
+      "skipInDocs": true,
+      "minProjectAge": "5m",
+      "maxFileSize": "1MB"
+    }
+  },
+  "enforcementSettings": {
+    "defaultLevel": "suggest",
+    "conflictResolution": "priority",
+    "maxSuggestions": 3,
+    "requireConfirmation": {
+      "block": true,
+      "warn": false,
+      "suggest": false
+    }
+  },
+  "performanceSettings": {
+    "maxFileScanDepth": 100,
+    "contentScanTimeout": "10s",
+    "cacheResults": true,
+    "cacheExpiry": "10m"
+  },
+  "notes": {
+    "merged_from": "8 locally implemented skills (marketplace skills web-artifacts-builder and frontend-design removed - not locally implemented)",
+    "total_skills": 8,
+    "enforcement_types": {
+      "suggest": "Skill suggestion appears but doesn't block execution",
+      "block": "Requires skill to be used before proceeding (guardrail)",
+      "warn": "Shows warning but allows proceeding"
+    },
+    "priority_levels": {
+      "critical": "Highest - Always trigger when matched",
+      "high": "Important - Trigger for most matches",
+      "medium": "Moderate - Trigger for clear matches",
+      "low": "Optional - Trigger only for explicit matches"
+    }
+  }
+}

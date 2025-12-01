@@ -23,7 +23,7 @@ Hooks are scripts that run at specific points in Claude's workflow:
 **Purpose:** Automatically suggests relevant skills based on user prompts and file context
 
 **How it works:**
-1. Reads `skill-rules.json`
+1. Reads `skill-rules.json` (**⚠️ must be in `.claude/skills/` directory**)
 2. Matches user prompt against trigger patterns
 3. Checks which files user is working with
 4. Injects skill suggestions into Claude's context
