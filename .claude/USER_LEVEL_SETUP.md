@@ -8,8 +8,8 @@
 
 ## 📋 Status: COMPLETE & WORKING ✅
 
-**Date:** 2025-11-19
-**Current State:** User-level infrastructure fully implemented and validated. Auto-discovery architecture working perfectly with 20 total components (7 user-level agents, 7 project-level agents, 2 user-level commands, 4 project-level commands) plus 6 user-level skills following proper showcase architecture.
+**Date:** 2025-11-19 (Updated: 2025-12-02)
+**Current State:** User-level infrastructure fully implemented and validated. Auto-discovery architecture working perfectly with universal components available across all projects. Critical path resolution and hook configuration issues have been resolved.
 
 ### ✅ What's Working Great (User-Level + Project-Level)
 - **Hook System**: UserPromptSubmit + PostToolUse hooks working perfectly
@@ -644,12 +644,85 @@ This hybrid approach gives you the best of both worlds: universal tools for cons
 - ⚠️ Commands display documentation instead of executing implementation
 - 🔧 Needs investigation for command execution logic
 
+### 🛠️ Critical Fixes Applied (2025-12-02)
+
+#### Hook Path Resolution Issues
+**Problem:** UserPromptSubmit and PostToolUse hooks were hardcoded to project-level paths, causing failures when user-level components weren't found.
+
+**Solution:** Implemented proper environment variable usage and fallback logic:
+```bash
+# Check for user-level skill-rules.json first, then fall back to project-level
+USER_SKILLS_PATH="$HOME/.claude/skill-rules.json"
+PROJECT_SKILLS_PATH=".claude/skill-rules.json"
+
+export SKILL_RULES_PATH="$USER_SKILLS_PATH"
+if [[ ! -f "$USER_SKILLS_PATH" ]]; then
+  export SKILL_RULES_PATH="$PROJECT_SKILLS_PATH"
+fi
+```
+
+#### TypeScript Script Dependencies
+**Problem:** TypeScript execution failed due to missing `node_modules` at user-level.
+
+**Solution:** Copied required dependencies and updated hook paths:
+```bash
+cp -r .claude/hooks/node_modules ~/.claude/hooks/
+cp .claude/hooks/skill-activation-prompt.ts ~/.claude/hooks/
+# Hook now uses: npx tsx "$HOME/.claude/hooks/skill-activation-prompt.ts"
+```
+
+#### Error Handling & Input Validation
+**Problem:** TypeScript script crashed when `data.prompt` was undefined or JSON was malformed.
+
+**Solution:** Added proper null checks and graceful error handling:
+```typescript
+// Handle missing prompt gracefully
+if (!data || !data.prompt) {
+    process.exit(0); // No prompt, no skill activation
+}
+
+const prompt = data.prompt.toLowerCase();
+```
+
+#### Settings.json Configuration
+**Problem:** User-level `settings.json` didn't include hook configurations.
+
+**Solution:** Added proper hook paths to user-level settings:
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/chandlerhardy/.claude/hooks/skill-activation-prompt.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/chandlerhardy/.claude/hooks/post-tool-use-tracker.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
 ### 🎯 Key Achievements
 
 #### 1. Sophisticated Skill System
-- **Pattern-based activation** working flawlessly
-- **Domain-specific expertise** for chess development
+- **Pattern-based activation** working flawlessly with user-level fallbacks
+- **Domain-specific expertise** for chess development (project-level) + universal patterns (user-level)
 - **Automatic context awareness** based on keywords and file paths
+- **Cross-project availability** - universal skills work in any directory
 
 #### 2. Agent Model Optimization
 - **Strategic model assignment** based on task complexity
