@@ -880,4 +880,107 @@ Try editing a .vue file - the skill should activate.
 
 ---
 
+## Troubleshooting
+
+### FreeBSD-Specific Hook Issues
+
+If you encounter "UserPromptSubmit hook error" messages on FreeBSD systems, this is typically caused by how bash scripts handle stderr output and exit codes differently on FreeBSD.
+
+**Common Symptoms:**
+- Hook appears to execute (you see skill suggestions)
+- But you also see "UserPromptSubmit hook error" in the output
+- npm warnings like "Unknown global config 'python'" appear in logs
+
+**Root Causes:**
+
+1. **`set -e` in shell scripts** - Causes script to exit on any stderr output (like npm warnings)
+2. **npm warnings to stderr** - npm config warnings are written to stderr, triggering failure with `set -e`
+3. **Strict error handling** - FreeBSD's bash may be more strict about exit codes
+
+**Solution for skill-activation-prompt.sh:**
+
+Replace the shell script wrapper with more lenient error handling:
+
+```bash
+#!/bin/bash
+# Remove: set -e
+
+# Use user-level hooks from ~/.claude/hooks
+HOOK_DIR="$HOME/.claude/hooks"
+cd "$HOOK_DIR"
+
+# Suppress npm warnings by redirecting stderr, but keep the actual output
+cat | NPM_CONFIG_LOGLEVEL=error npx tsx skill-activation-prompt.ts 2>/dev/null || true
+```
+
+Key changes:
+- Remove `set -e` to prevent exiting on stderr
+- Add `NPM_CONFIG_LOGLEVEL=error` to suppress npm warnings
+- Redirect stderr with `2>/dev/null`
+- Add `|| true` to ensure script always exits with code 0
+
+**Solution for TypeScript file (skill-activation-prompt.ts):**
+
+Add input validation to handle edge cases:
+
+```typescript
+async function main() {
+    try {
+        // Read input from stdin
+        const input = readFileSync(0, 'utf-8').trim();
+
+        // If no input or empty input, silently exit
+        if (!input) {
+            process.exit(0);
+        }
+
+        const data: HookInput = JSON.parse(input);
+
+        // Handle case where prompt might be undefined or in a different field
+        const prompt = (data.prompt || (data as any).message || '').toLowerCase();
+
+        // If no prompt found, silently exit
+        if (!prompt) {
+            process.exit(0);
+        }
+
+        // ... rest of the code
+    } catch (error) {
+        // Log to stderr but exit cleanly
+        console.error('Error in skill-activation-prompt hook:', error);
+        process.exit(0);  // Exit with success code to avoid blocking
+    }
+}
+```
+
+**Testing the Fix:**
+
+```bash
+# Test manually with empty input
+echo '{}' | ~/.claude/hooks/skill-activation-prompt.sh
+# Should exit cleanly without errors
+
+# Test with normal input
+echo '{"prompt":"test message"}' | ~/.claude/hooks/skill-activation-prompt.sh
+# Should show skill suggestions if any match
+
+# Check exit code
+echo $?
+# Should be 0 (success)
+```
+
+**Why This Happens on FreeBSD:**
+
+FreeBSD's bash environment may have stricter default configurations or different npm global settings that cause warnings. The combination of `set -e` in shell scripts with stderr output creates a failure condition that doesn't occur on Linux systems.
+
+**Prevention:**
+
+When creating new hooks for cross-platform use:
+- Avoid `set -e` in wrapper scripts that call external tools
+- Always add `|| true` to prevent hook failures from blocking Claude Code
+- Suppress or redirect stderr from tools like npm
+- Add defensive input validation in TypeScript/JavaScript
+
+---
+
 **Remember:** This is a reference library, not a working application. Your job is to help users cherry-pick and adapt components for THEIR specific project structure.
