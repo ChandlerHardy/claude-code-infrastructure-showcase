@@ -46,7 +46,8 @@ Browse the [skills catalog](.claude/skills/) and copy what you need.
 **Available:**
 - **backend-dev-guidelines** - Node.js/Express/TypeScript patterns
 - **frontend-dev-guidelines** - React/TypeScript/MUI v7 patterns
-- **skill-developer** - Meta-skill for creating skills
+- **skill-developer** - Meta-skill for creating skills (recommended: user-level)
+- **managing-dev-docs** - Track features across sessions (recommended: user-level)
 - **route-tester** - Test authenticated API routes
 - **error-tracking** - Sentry integration patterns
 
@@ -111,13 +112,17 @@ skill-name/
 
 ```
 .claude/
-├── skills/                 # 5 production skills
-│   ├── backend-dev-guidelines/  (12 resource files)
-│   ├── frontend-dev-guidelines/ (11 resource files)
-│   ├── skill-developer/         (7 resource files)
-│   ├── route-tester/
-│   ├── error-tracking/
-│   └── skill-rules.json    # Skill activation configuration
+├── skills/                 # 9 skills (some for user-level, some project-level)
+│   ├── backend-dev-guidelines/  (12 resource files) [project-level]
+│   ├── frontend-dev-guidelines/ (11 resource files) [project-level]
+│   ├── skill-developer/         (7 resource files) [user-level]
+│   ├── managing-dev-docs/       [user-level]
+│   ├── route-tester/            [project-level]
+│   ├── error-tracking/          [project-level]
+│   └── skill-rules.json    # Project-level skill activation config
+│
+│   Note: User-level skills (skill-developer, managing-dev-docs)
+│   are in showcase as REFERENCE - users copy to ~/.claude/skills/
 ├── hooks/                  # 6 hooks for automation
 │   ├── skill-activation-prompt.*  (ESSENTIAL)
 │   ├── post-tool-use-tracker.sh   (ESSENTIAL)
@@ -141,17 +146,20 @@ dev/
 
 ## Component Catalog
 
-### 🎨 Skills (5)
+### 🎨 Skills (6)
 
-| Skill | Lines | Purpose | Best For |
-|-------|-------|---------|----------|
-| [**skill-developer**](.claude/skills/skill-developer/) | 426 | Creating and managing skills | Meta-development |
-| [**backend-dev-guidelines**](.claude/skills/backend-dev-guidelines/) | 304 | Express/Prisma/Sentry patterns | Backend APIs |
-| [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | 398 | React/MUI v7/TypeScript | React frontends |
-| [**route-tester**](.claude/skills/route-tester/) | 389 | Testing authenticated routes | API testing |
-| [**error-tracking**](.claude/skills/error-tracking/) | ~250 | Sentry integration | Error monitoring |
+| Skill | Lines | Purpose | Best For | Location |
+|-------|-------|---------|----------|----------|
+| [**skill-developer**](.claude/skills/skill-developer/) | 426 | Creating and managing skills | Meta-development | User-level |
+| [**managing-dev-docs**](.claude/skills/managing-dev-docs/) | ~200 | Track features across sessions | Feature tracking | User-level |
+| [**backend-dev-guidelines**](.claude/skills/backend-dev-guidelines/) | 304 | Express/Prisma/Sentry patterns | Backend APIs | Project-level |
+| [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | 398 | React/MUI v7/TypeScript | React frontends | Project-level |
+| [**route-tester**](.claude/skills/route-tester/) | 389 | Testing authenticated routes | API testing | Project-level |
+| [**error-tracking**](.claude/skills/error-tracking/) | ~250 | Sentry integration | Error monitoring | Project-level |
 
 **All skills follow the modular pattern** - main file + resource files for progressive disclosure.
+
+**⚠️ Important:** Skills marked "User-level" should be copied to `~/.claude/skills/` (available everywhere), not project `.claude/skills/`. The showcase includes them as reference for users to copy.
 
 **👉 [How to integrate skills →](.claude/skills/README.md)**
 
@@ -209,7 +217,11 @@ dev/
 3. Suggests relevant skills automatically
 4. Skills load only when needed
 
-**⚠️ IMPORTANT**: skill-rules.json **must** be located in `.claude/skills/` directory (not `.claude/`) for the hook to find it.
+**⚠️ IMPORTANT**: skill-rules.json can be in TWO locations:
+- **Project-level:** `.claude/skills/skill-rules.json` (project-specific skills)
+- **User-level:** `~/.claude/skills/skill-rules.json` (global skills available everywhere)
+
+Some skills work better at user-level (skill-developer, managing-dev-docs) since they're useful across all projects.
 
 **This solves the #1 problem** with Claude Code skills: they don't activate on their own.
 
@@ -271,14 +283,15 @@ Some hooks expect specific structures:
 1. Copy skill-activation-prompt hook
 2. Copy post-tool-use-tracker hook
 3. **⚠️ CRITICAL**: Copy skill-rules.json to `.claude/skills/` (NOT `.claude/`)
+   - OR create user-level `~/.claude/skills/skill-rules.json` for global skills
 4. Update settings.json
 5. Install hook dependencies
 
 ### Phase 2: Add First Skill (10 min)
 1. Pick ONE relevant skill
-2. Copy skill directory
-3. Create/update skill-rules.json
-4. Customize path patterns
+2. Copy skill directory (to project or user level as appropriate)
+3. Create/update skill-rules.json (project or user level)
+4. Customize path patterns (project-level skills only)
 
 ### Phase 3: Test & Iterate (5 min)
 1. Edit a file - skill should activate

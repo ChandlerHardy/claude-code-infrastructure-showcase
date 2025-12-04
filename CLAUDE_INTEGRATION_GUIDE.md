@@ -68,8 +68,14 @@ Which would you prefer?
 
 These work for ANY tech stack:
 - ✅ **skill-developer** - Meta-skill, no tech requirements
+- ✅ **managing-dev-docs** - Feature tracking across sessions, no tech requirements
 - ✅ **route-tester** - Only requires JWT cookie auth (framework agnostic)
 - ✅ **error-tracking** - Sentry works with most stacks
+
+**Recommended for user-level (~/.claude/skills/):**
+- skill-developer
+- managing-dev-docs
+- documentation-maintenance
 
 ---
 
@@ -102,17 +108,33 @@ When user says: **"Add [component] to my project"**
 
 #### 2. Copy the Skill
 
+**For project-specific skills:**
 ```bash
 cp -r /path/to/showcase/.claude/skills/[skill-name] \\
       $CLAUDE_PROJECT_DIR/.claude/skills/
 ```
 
+**For user-level skills (managing-dev-docs, skill-developer):**
+```bash
+cp -r /path/to/showcase/.claude/skills/[skill-name] \\
+      ~/.claude/skills/
+```
+
+**Important:** The showcase contains ALL skills as reference, but some (like managing-dev-docs) are meant to be installed at user-level, not project-level.
+
 #### 3. Handle skill-rules.json
 
-**Check if it exists:**
+**IMPORTANT:** There are TWO possible locations for skill-rules.json:
+- **Project-level:** `$CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json` (project-specific skills)
+- **User-level:** `~/.claude/skills/skill-rules.json` (global skills available everywhere)
+
+**Check which exists:**
 ```bash
 ls $CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json
+ls ~/.claude/skills/skill-rules.json
 ```
+
+**For project-specific skills:**
 
 **If NO (doesn't exist):**
 - Copy the template from showcase
@@ -123,6 +145,26 @@ ls $CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json
 - Read their current skill-rules.json
 - Add the new skill entry
 - Merge carefully to avoid breaking existing skills
+
+**For user-level global skills:**
+
+Some skills are better suited for user-level configuration because they're useful across ALL projects:
+- `managing-dev-docs` - Feature tracking across sessions (works for any project)
+- `skill-developer` - Meta-skill for creating skills (useful everywhere)
+- `documentation-maintenance` - Doc updates reminder (applies to all projects)
+
+**To add a skill at user-level:**
+```bash
+# Check if user-level skill-rules.json exists
+if [ ! -f ~/.claude/skills/skill-rules.json ]; then
+  # Create it with base structure
+  mkdir -p ~/.claude/skills
+  echo '{"version": "1.0.0", "skills": {}}' > ~/.claude/skills/skill-rules.json
+fi
+
+# Add the skill entry to the "skills" object
+# (merge with existing skills, don't overwrite)
+```
 
 #### 4. Customize Path Patterns
 
@@ -217,6 +259,15 @@ cat $CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json | jq .
 #### skill-developer
 - **Tech Requirements:** None!
 - **Copy as-is** - meta-skill, fully generic, teaches skill creation for ANY tech stack
+- **Recommended location:** User-level (`~/.claude/skills/skill-rules.json`) - useful across all projects
+
+#### managing-dev-docs
+- **Tech Requirements:** None!
+- **Purpose:** Tracks complex features across sessions using dev docs (plan.md, context.md, tasks.md)
+- **Copy as-is** - fully generic, works for any project or tech stack
+- **Recommended location:** User-level (`~/.claude/skills/skill-rules.json`) - useful across all projects
+- **Where docs are stored:** `~/.claude/dev-docs/` by default
+- **Ask:** "Do you work on complex features that span multiple sessions?"
 
 ---
 
@@ -774,7 +825,41 @@ Use it by running the Task tool with:
 The agent will review your code and provide architectural feedback.
 ```
 
-### Example 3: Tech Stack Mismatch
+### Example 3: Adding User-Level Skill
+
+**User:** "Add the managing-dev-docs skill so I can track features across sessions"
+
+**Claude should respond:**
+```
+The managing-dev-docs skill helps track complex features across multiple sessions
+using dev docs (plan.md, context.md, tasks.md). This is a great candidate for
+user-level installation since it's useful across ALL your projects.
+
+I'll add it to your user-level skill-rules.json at ~/.claude/skills/skill-rules.json
+so it's available everywhere, not just in this project.
+```
+
+**Then:**
+1. Copy the skill directory: `cp -r showcase/.claude/skills/managing-dev-docs ~/.claude/skills/`
+2. Check if ~/.claude/skills/skill-rules.json exists
+3. If not, create the base structure
+4. Add the managing-dev-docs skill entry to ~/.claude/skills/skill-rules.json
+   (NOT to the project-level skill-rules.json)
+5. Respond:
+```
+✅ Added managing-dev-docs skill at user level!
+
+Configuration:
+- Location: ~/.claude/skills/skill-rules.json (available in ALL projects)
+- Triggers on keywords: "dev docs", "resume", "continue", "feature tracking"
+- Dev docs stored in: ~/.claude/dev-docs/
+
+This skill will now be available across all your Claude Code projects.
+
+Try it: Ask me "Do we have dev docs for this feature?" or "Resume work on [feature]"
+```
+
+### Example 4: Tech Stack Mismatch
 
 **User:** "Add the frontend-dev-guidelines skill to my Vue project"
 
@@ -831,18 +916,20 @@ Try editing a .vue file - the skill should activate.
 
 ### What Needs Customization?
 
-| Component | Tech Requirements | Customization | What to Ask |
-|-----------|------------------|--------------|-------------|
-| **skill-developer** | None | ✅ None | Copy as-is |
-| **backend-dev-guidelines** | Express/Prisma/Node | ⚠️ Paths + tech check | "Use Express/Prisma?" "Where's backend?" |
-| **frontend-dev-guidelines** | React/MUI v7 | ⚠️⚠️ Paths + framework | "Use React/MUI v7?" "Where's frontend?" |
-| **route-tester** | JWT cookies | ⚠️ Auth + paths | "JWT cookie auth?" |
-| **error-tracking** | Sentry | ⚠️ Paths | "Use Sentry?" "Where's backend?" |
-| **skill-activation-prompt** | ✅ None | Copy as-is |
-| **post-tool-use-tracker** | ✅ None | Copy as-is |
-| **tsc-check** | ⚠️⚠️⚠️ Heavy | "Monorepo or single service?" |
-| **All agents** | ✅ Minimal | Check paths |
-| **All commands** | ⚠️ Paths | "Where for dev docs?" |
+| Component | Tech Requirements | Customization | What to Ask | Recommended Location |
+|-----------|------------------|--------------|-------------|---------------------|
+| **skill-developer** | None | ✅ None | Copy as-is | User-level |
+| **managing-dev-docs** | None | ✅ None | "Work on features spanning multiple sessions?" | User-level |
+| **documentation-maintenance** | None | ✅ None | Copy as-is | User-level |
+| **backend-dev-guidelines** | Express/Prisma/Node | ⚠️ Paths + tech check | "Use Express/Prisma?" "Where's backend?" | Project-level |
+| **frontend-dev-guidelines** | React/MUI v7 | ⚠️⚠️ Paths + framework | "Use React/MUI v7?" "Where's frontend?" | Project-level |
+| **route-tester** | JWT cookies | ⚠️ Auth + paths | "JWT cookie auth?" | Project-level |
+| **error-tracking** | Sentry | ⚠️ Paths | "Use Sentry?" "Where's backend?" | Project-level |
+| **skill-activation-prompt** | ✅ None | Copy as-is | N/A | N/A (hook) |
+| **post-tool-use-tracker** | ✅ None | Copy as-is | N/A | N/A (hook) |
+| **tsc-check** | ⚠️⚠️⚠️ Heavy | "Monorepo or single service?" | Project-level |
+| **All agents** | ✅ Minimal | Check paths | N/A | N/A |
+| **All commands** | ⚠️ Paths | "Where for dev docs?" | N/A | N/A |
 
 ### When to Recommend Skipping
 
@@ -872,6 +959,12 @@ Try editing a .vue file - the skill should activate.
 - Recommend starting with just skill-activation hooks
 - Add backend OR frontend skill (whichever they use)
 - Add more later as needed
+
+**When adding user-level skills (managing-dev-docs, skill-developer):**
+- Copy skill directory to `~/.claude/skills/` (NOT project .claude/skills/)
+- Add entry to `~/.claude/skills/skill-rules.json` (NOT project skill-rules.json)
+- Explain: "This skill is now available across ALL your projects"
+- The showcase contains these as reference - users copy to their user-level location
 
 **Always explain what you're doing:**
 - Show the commands you're running
