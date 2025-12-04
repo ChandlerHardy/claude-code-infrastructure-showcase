@@ -10,7 +10,9 @@
       "Bash(.claude/hooks/trigger-build-resolver.sh:*)",
       "Bash(chmod:*)",
       "Bash(ls:*)",
-      "Bash(~/.claude/hooks/post-tool-use-tracker.sh)"
+      "Bash(~/.claude/hooks/post-tool-use-tracker.sh)",
+      "Bash(~/.claude/hooks/skill-activation-prompt.sh)",
+      "Bash(/home/chandlerhardy/.claude/hooks/skill-activation-prompt.sh:*)"
     ],
     "deny": [],
     "ask": []
