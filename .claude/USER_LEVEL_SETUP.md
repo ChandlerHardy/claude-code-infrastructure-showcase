@@ -270,7 +270,7 @@ Create `~/.claude/skill-rules.json` (Note: stored directly in .claude directory 
         ]
       }
     },
-    "documentation-maintenance": {
+    "skill-developer": {
       "type": "productivity",
       "enforcement": "suggest",
       "priority": "high",
@@ -381,7 +381,7 @@ This configuration enables intelligent, context-aware skill activation while mai
 
 ### 6. Automatic Documentation Maintenance 🆕
 
-**NEW FEATURE**: The `documentation-maintenance` skill provides automatic reminders and suggestions for keeping your development documentation up-to-date.
+**NEW FEATURE**: The `skill-developer` skill provides automatic reminders and suggestions for keeping your development documentation up-to-date.
 
 #### How It Works
 - **Keyword Detection**: Detects when you mention "documentation", "update", "complete", "finish", etc.
@@ -411,7 +411,7 @@ This feature solves the common problem of forgetting to update development docum
 ```
 ~/.claude/skills/
 ├── skill-rules.json              # Global skill activation rules
-├── documentation-maintenance/     # Auto documentation reminders
+├── skill-developer/     # Auto documentation reminders
 ├── general-development/          # Universal development patterns
 ├── error-tracking/              # Error handling and monitoring
 ├── frontend-development/        # React, Next.js, TypeScript
@@ -419,7 +419,7 @@ This feature solves the common problem of forgetting to update development docum
 ```
 
 **User-Level Skills (5 custom skills):**
-- **documentation-maintenance** - Automatic reminders for updating docs
+- **skill-developer** - Automatic reminders for updating docs
 - **general-development** - Language-agnostic programming patterns
 - **error-tracking** - Comprehensive error handling strategies
 - **frontend-development** - Modern React/Next.js development

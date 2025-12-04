@@ -8,32 +8,6 @@
     "project": "claude-code-infrastructure-showcase"
   },
   "skills": {
-    "documentation-maintenance": {
-      "type": "productivity",
-      "enforcement": "suggest",
-      "priority": "high",
-      "description": "Automatic documentation updates and maintenance reminders",
-      "promptTriggers": {
-        "keywords": ["documentation", "docs", "readme", "update", "complete", "finish", "done"],
-        "intentPatterns": [
-          "update.*documentation",
-          "complete.*feature",
-          "finish.*implementation",
-          "wrap.*up.*session",
-          "document.*changes"
-        ]
-      },
-      "fileTriggers": {
-        "patterns": ["**/*.md", "**/*.rst", "dev/**/*"],
-        "contentSignatures": [
-          "TODO|FIXME|HACK",
-          "#.*API",
-          "#.*Documentation",
-          "##.*Implementation",
-          "class.*|^def.*"
-        ]
-      }
-    },
     "general-development": {
       "type": "domain",
       "enforcement": "suggest",
@@ -231,6 +205,33 @@
           "export.*Controller",
           "export.*Service",
           "prisma\\."
+        ]
+      }
+    },
+    "managing-dev-docs": {
+      "type": "productivity",
+      "enforcement": "suggest",
+      "priority": "critical",
+      "description": "Creates structured development documentation (plan, context, tasks) for complex multi-step projects",
+      "promptTriggers": {
+        "keywords": ["complex", "multi-step", "implement", "create", "add", "build", "feature", "continue", "resume", "dev docs", "development documentation"],
+        "intentPatterns": [
+          "(implement|create|add|build).*feature",
+          "(continue|resume).*work",
+          "(start|begin).*project",
+          "complex.*task",
+          "multi.*step",
+          "development.*documentation"
+        ]
+      },
+      "fileTriggers": {
+        "pathPatterns": ["**/*.md", "**/*.txt", "dev/**/*", ".claude/**/*"],
+        "contentSignatures": [
+          "TODO|FIXME|HACK|NOTE",
+          "WIP|TODO|IN PROGRESS",
+          "#.*Plan|#.*Context|#.*Tasks",
+          "session.*progress",
+          "implementation.*notes"
         ]
       }
     },

@@ -75,7 +75,7 @@ These work for ANY tech stack:
 **Recommended for user-level (~/.claude/skills/):**
 - skill-developer
 - managing-dev-docs
-- documentation-maintenance
+- managing-dev-docs
 
 ---
 
@@ -151,7 +151,7 @@ ls ~/.claude/skills/skill-rules.json
 Some skills are better suited for user-level configuration because they're useful across ALL projects:
 - `managing-dev-docs` - Feature tracking across sessions (works for any project)
 - `skill-developer` - Meta-skill for creating skills (useful everywhere)
-- `documentation-maintenance` - Doc updates reminder (applies to all projects)
+- `managing-dev-docs` - Doc updates reminder (applies to all projects)
 
 **To add a skill at user-level:**
 ```bash
@@ -920,7 +920,7 @@ Try editing a .vue file - the skill should activate.
 |-----------|------------------|--------------|-------------|---------------------|
 | **skill-developer** | None | ✅ None | Copy as-is | User-level |
 | **managing-dev-docs** | None | ✅ None | "Work on features spanning multiple sessions?" | User-level |
-| **documentation-maintenance** | None | ✅ None | Copy as-is | User-level |
+| **managing-dev-docs** | None | ✅ None | Copy as-is | User-level |
 | **backend-dev-guidelines** | Express/Prisma/Node | ⚠️ Paths + tech check | "Use Express/Prisma?" "Where's backend?" | Project-level |
 | **frontend-dev-guidelines** | React/MUI v7 | ⚠️⚠️ Paths + framework | "Use React/MUI v7?" "Where's frontend?" | Project-level |
 | **route-tester** | JWT cookies | ⚠️ Auth + paths | "JWT cookie auth?" | Project-level |
