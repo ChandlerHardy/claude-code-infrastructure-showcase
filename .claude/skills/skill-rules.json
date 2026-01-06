@@ -272,6 +272,71 @@
           "app\\.(get|post|put|delete|patch)"
         ]
       }
+    },
+    "managing-dev-docs": {
+      "type": "productivity",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Dev docs management for tracking complex features across sessions",
+      "promptTriggers": {
+        "keywords": [
+          "dev docs",
+          "dev-docs",
+          "devdocs",
+          "resume",
+          "continue",
+          "context",
+          "plan",
+          "tasks",
+          "feature tracking",
+          "working on"
+        ],
+        "intentPatterns": [
+          "do we have.*dev docs",
+          "check.*dev docs",
+          "are there.*dev docs",
+          "any.*dev docs",
+          "show.*dev docs",
+          "resume.*work",
+          "continue.*feature",
+          "continue.*work",
+          "what.*working on",
+          "where.*left off",
+          "what.*progress",
+          "check.*progress"
+        ]
+      }
+    },
+    "superpowers:requesting-code-review": {
+      "type": "quality",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Request code review before committing to catch architectural issues",
+      "promptTriggers": {
+        "keywords": [
+          "done",
+          "complete",
+          "finished",
+          "commit",
+          "ready",
+          "merge",
+          "push",
+          "ship",
+          "deploy"
+        ],
+        "intentPatterns": [
+          "feature.*complete",
+          "implementation.*done",
+          "ready.*to.*commit",
+          "ready.*for.*review",
+          "ready.*to.*merge",
+          "finished.*implementing",
+          "completed.*task",
+          "wrap.*up",
+          "all.*set",
+          "looks.*good"
+        ]
+      }
     }
   },
   "skipMechanisms": {
@@ -309,8 +374,8 @@
     "cacheExpiry": "10m"
   },
   "notes": {
-    "merged_from": "8 locally implemented skills (marketplace skills web-artifacts-builder and frontend-design removed - not locally implemented)",
-    "total_skills": 8,
+    "merged_from": "10 locally implemented skills (includes managing-dev-docs and superpowers:requesting-code-review for code quality)",
+    "total_skills": 10,
     "enforcement_types": {
       "suggest": "Skill suggestion appears but doesn't block execution",
       "block": "Requires skill to be used before proceeding (guardrail)",

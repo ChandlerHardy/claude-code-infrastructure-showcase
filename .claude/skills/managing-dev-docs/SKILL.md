@@ -52,6 +52,15 @@ Dev docs live in `~/.claude/dev-docs/{project-name}/{feature-name}/`:
 2. Update `context.md` with discoveries, key files, decisions
 3. DO NOT skip updating docs "because it's obvious" or "to save time"
 
+### When User Mentions Commit
+
+When user says "I've committed", "committed", or indicates they've committed changes:
+
+1. **Update progress immediately** - Mark completed tasks in `tasks.md`
+2. **Document changes** - Update `context.md` with what was implemented
+3. **Record outcomes** - Add results, bugs found, lessons learned
+4. **Next steps** - Note what remains to be done
+
 ### Before Context Compaction
 
 1. Update `context.md` with current state and next steps
@@ -60,9 +69,36 @@ Dev docs live in `~/.claude/dev-docs/{project-name}/{feature-name}/`:
 
 ### Resuming Work
 
-1. First check `~/.claude/dev-docs/{project}/` for existing docs
-2. Read all three files before asking user for context
-3. If no docs exist but work is incomplete, create them now
+1. **Search for dev docs** - Don't assume exact path, search the directory
+2. **Read all files** - Read plan.md, context.md, tasks.md before asking user
+3. **Create if missing** - If no docs exist but work is incomplete, create them now
+
+#### Finding Dev Docs (CRITICAL)
+
+When user mentions a feature/branch, **DO NOT GUESS the exact path**. Instead:
+
+**Step 1: List project dev docs**
+```bash
+ls -la ~/.claude/dev-docs/{project-name}/ 2>/dev/null || echo "No dev docs"
+```
+
+**Step 2: Search for similar names**
+```bash
+# Case-insensitive search for feature keywords
+find ~/.claude/dev-docs/{project-name}/ -maxdepth 1 -type d -iname "*keyword*"
+```
+
+**Examples:**
+- User says "custom nav bar" → Search for `*custom*`, `*nav*`, `*bar*`
+- User says "feature/custom-nav-bar" → Try variations: `custom-nav-bar`, `customizable-nav-bar`, `navigation-bar`
+- Branch differs from folder → Match on keywords, not exact name
+
+**Common Mismatches:**
+- Branch: `feature/custom-nav-bar` → Folder: `customizable-navigation-bar`
+- Branch: `fix/bug-123` → Folder: `bug-123-fix`
+- User says: "the dashboard thing" → Folder: `consultant-dashboard`
+
+**Always search first, then read. Never assume exact path.**
 
 ## Common Mistakes
 
@@ -74,6 +110,7 @@ Dev docs live in `~/.claude/dev-docs/{project-name}/{feature-name}/`:
 | "This is too simple" | Single functions need docs too. No exceptions. |
 | "Build is broken, skip process" | Broken builds need tracking MORE, not less. |
 | "Just one quick thing" | Quick things forgotten fastest. Document it. |
+| "File doesn't exist at exact path" | SEARCH the directory first. Branch names ≠ folder names. |
 
 ## No Exceptions
 
@@ -102,8 +139,9 @@ Not for:
 
 | Action | Command |
 |--------|---------|
+| Find docs | `ls -la ~/.claude/dev-docs/{project}/` then search for similar names |
 | Create docs | `~/.claude/dev-docs/{project}/{feature}/` with plan.md, context.md, tasks.md |
-| Resume work | Read all three files before asking user |
+| Resume work | Search → Read all three files → Continue (never ask user first) |
 | During work | Mark tasks complete immediately |
 
 ## Real-World Impact
