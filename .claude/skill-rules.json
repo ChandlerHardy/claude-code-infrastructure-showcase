@@ -214,14 +214,17 @@
       "priority": "critical",
       "description": "Creates structured development documentation (plan, context, tasks) for complex multi-step projects",
       "promptTriggers": {
-        "keywords": ["complex", "multi-step", "implement", "create", "add", "build", "feature", "continue", "resume", "dev docs", "development documentation"],
+        "keywords": ["complex", "multi-step", "implement", "create", "add", "build", "feature", "continue", "resume", "dev docs", "development documentation", "commit", "committed"],
         "intentPatterns": [
           "(implement|create|add|build).*feature",
           "(continue|resume).*work",
           "(start|begin).*project",
           "complex.*task",
           "multi.*step",
-          "development.*documentation"
+          "development.*documentation",
+          "got.*committed",
+          "just.*committed",
+          "i.*committed"
         ]
       },
       "fileTriggers": {
