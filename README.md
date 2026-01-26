@@ -15,6 +15,7 @@ Born from 6 months of real-world use managing a complex TypeScript microservices
 - ✅ **Modular skill pattern** (500-line rule with progressive disclosure)
 - ✅ **Specialized agents** for complex tasks
 - ✅ **Dev docs system** that survives context resets
+- ✅ **Utility scripts** for provider switching and infrastructure management
 - ✅ **Comprehensive examples** using generic blog domain
 
 **Time investment to build:** 6 months of iteration
@@ -63,6 +64,13 @@ Browse the [skills catalog](.claude/skills/) and copy what you need.
 - And more...
 
 **👉 [Agents Guide: .claude/agents/README.md](.claude/agents/README.md)**
+
+### 🔧 I want utility scripts
+
+Production-tested scripts for infrastructure management:
+- **claude-provider** - Switch between Anthropic and Z.AI providers with automatic backups
+
+**👉 [Scripts Guide: scripts/README.md](scripts/README.md)**
 
 ---
 
@@ -137,6 +145,9 @@ skill-name/
     ├── dev-docs.md
     └── ...
 
+scripts/                    # Utility scripts
+└── claude-provider         # Provider switcher (Anthropic/Z.AI)
+
 dev/
 └── active/                 # Dev docs pattern examples
     └── public-infrastructure-repo/
@@ -204,6 +215,16 @@ dev/
 | /dev-docs | Create structured dev documentation |
 | /dev-docs-update | Update docs before context reset |
 | /route-research-for-testing | Research route patterns for testing |
+
+### 🔧 Utility Scripts (1)
+
+| Script | Purpose |
+|--------|---------|
+| claude-provider | Switch between API providers (Anthropic/Z.AI) with automatic backups |
+
+**Standalone - copy to ~/bin/ and use!**
+
+**👉 [Scripts guide →](scripts/README.md)**
 
 ---
 
@@ -371,6 +392,7 @@ MIT License - Use freely in your projects, commercial or personal.
 - 🎨 [Skills Documentation](.claude/skills/README.md)
 - 🪝 [Hooks Setup](.claude/hooks/README.md)
 - 🤖 [Agents Guide](.claude/agents/README.md)
+- 🔧 [Utility Scripts](scripts/README.md)
 - 📝 [Dev Docs Pattern](dev/README.md)
 
 **Start here:** Copy the two essential hooks, add one skill, and see the auto-activation magic happen.
