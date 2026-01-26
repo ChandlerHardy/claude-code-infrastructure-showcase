@@ -273,6 +273,51 @@
         ]
       }
     },
+    "refactoring-patterns": {
+      "type": "quality",
+      "enforcement": "suggest",
+      "priority": "high",
+      "description": "Code quality and refactoring analysis. Use when reviewing code for duplication, code smells, refactoring opportunities, DRY violations, extraction candidates, and architectural improvements. Identifies duplicated logic, similar code blocks, and opportunities to extract shared classes or functions.",
+      "promptTriggers": {
+        "keywords": [
+          "refactor",
+          "refactoring",
+          "code quality",
+          "duplication",
+          "duplicate code",
+          "extract",
+          "DRY",
+          "code smell",
+          "similar code",
+          "shared class",
+          "code review",
+          "review code"
+        ],
+        "intentPatterns": [
+          "extract.*shared",
+          "duplicate.*logic",
+          "code.*duplication",
+          "refactor.*opportunity",
+          "similar.*code",
+          "repeated.*logic",
+          "extract.*class",
+          "extract.*function",
+          "DRY.*violation",
+          "code.*smell"
+        ]
+      },
+      "fileTriggers": {
+        "patterns": [
+          "**/*.php",
+          "**/*.ts",
+          "**/*.tsx",
+          "**/*.js",
+          "**/*.jsx",
+          "**/*.py",
+          "**/*.java"
+        ]
+      }
+    },
     "managing-dev-docs": {
       "type": "productivity",
       "enforcement": "suggest",
