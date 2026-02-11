@@ -47,10 +47,12 @@ Browse the [skills catalog](.claude/skills/) and copy what you need.
 **Available:**
 - **backend-dev-guidelines** - Node.js/Express/TypeScript patterns
 - **frontend-dev-guidelines** - React/TypeScript/MUI v7 patterns
+- **code-review-local** - 7-agent code review pipeline (warn enforcement)
 - **skill-developer** - Meta-skill for creating skills (recommended: user-level)
 - **managing-dev-docs** - Track features across sessions (recommended: user-level)
 - **route-tester** - Test authenticated API routes
 - **error-tracking** - Sentry integration patterns
+- **dev-docs-update** - Update dev docs after commits/deploys
 
 **👉 [Skills Guide: .claude/skills/README.md](.claude/skills/README.md)**
 
@@ -87,6 +89,19 @@ Production-tested scripts for infrastructure management:
 - Works via `skill-rules.json` configuration
 
 **Result:** Skills activate when you need them, not when you remember them.
+
+### Two-Tier Code Review Strategy
+
+**Problem:** Code reviews either don't happen (too manual) or are too heavy for every commit.
+
+**Solution:** Two-tier review system enforced via `code-review-local` skill (`warn` enforcement):
+
+| Tier | Tool | When | Speed |
+|------|------|------|-------|
+| **Per-commit** | `code-architecture-reviewer` Task agent | Every commit | ~30-60 seconds |
+| **Milestone** | `code-review-local` skill (7 parallel agents) | Phase completions, pre-deploy | ~3-5 minutes |
+
+The `code-review-local` skill is configured with `enforcement: "warn"` and `priority: "critical"`, so it actively warns whenever commit-related keywords appear. The warn message guides which tier to use.
 
 ### Production-Tested Patterns
 
@@ -157,16 +172,18 @@ dev/
 
 ## Component Catalog
 
-### 🎨 Skills (6)
+### 🎨 Skills (8)
 
 | Skill | Lines | Purpose | Best For | Location |
 |-------|-------|---------|----------|----------|
 | [**skill-developer**](.claude/skills/skill-developer/) | 426 | Creating and managing skills | Meta-development | User-level |
 | [**managing-dev-docs**](.claude/skills/managing-dev-docs/) | ~200 | Track features across sessions | Feature tracking | User-level |
+| [**code-review-local**](.claude/skills/code-review-local/) | ~210 | 7-agent code review pipeline | Pre-commit/milestone reviews | Project-level |
 | [**backend-dev-guidelines**](.claude/skills/backend-dev-guidelines/) | 304 | Express/Prisma/Sentry patterns | Backend APIs | Project-level |
 | [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | 398 | React/MUI v7/TypeScript | React frontends | Project-level |
 | [**route-tester**](.claude/skills/route-tester/) | 389 | Testing authenticated routes | API testing | Project-level |
 | [**error-tracking**](.claude/skills/error-tracking/) | ~250 | Sentry integration | Error monitoring | Project-level |
+| [**dev-docs-update**](.claude/skills/dev-docs-update/) | ~50 | Update dev docs after commits | Post-commit workflow | Project-level |
 
 **All skills follow the modular pattern** - main file + resource files for progressive disclosure.
 
