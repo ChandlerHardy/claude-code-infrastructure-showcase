@@ -183,7 +183,7 @@ dev/
 | [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | 398 | React/MUI v7/TypeScript | React frontends | Project-level |
 | [**route-tester**](.claude/skills/route-tester/) | 389 | Testing authenticated routes | API testing | Project-level |
 | [**error-tracking**](.claude/skills/error-tracking/) | ~250 | Sentry integration | Error monitoring | Project-level |
-| [**dev-docs-update**](.claude/skills/dev-docs-update/) | ~50 | Update dev docs after commits | Post-commit workflow | Project-level |
+| **dev-docs-update** | N/A | Triggers `/dev-docs-update` command reminder | Post-commit workflow | Slash command |
 
 **All skills follow the modular pattern** - main file + resource files for progressive disclosure.
 

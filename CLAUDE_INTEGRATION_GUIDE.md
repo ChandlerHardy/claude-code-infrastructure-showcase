@@ -70,7 +70,7 @@ These work for ANY tech stack:
 - ✅ **skill-developer** - Meta-skill, no tech requirements
 - ✅ **managing-dev-docs** - Feature tracking across sessions, no tech requirements
 - ✅ **code-review-local** - 7-agent code review pipeline, no tech requirements
-- ✅ **dev-docs-update** - Update dev docs after commits, no tech requirements
+- ✅ **dev-docs-update** - Triggers `/dev-docs-update` command reminder after commits
 - ✅ **route-tester** - Only requires JWT cookie auth (framework agnostic)
 - ✅ **error-tracking** - Sentry works with most stacks
 
