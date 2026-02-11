@@ -257,9 +257,9 @@
       "type": "productivity",
       "enforcement": "suggest",
       "priority": "critical",
-      "description": "Creates structured development documentation (plan, context, tasks) for complex multi-step projects",
+      "description": "Creates and updates structured development documentation (plan, context, tasks) for complex multi-step projects",
       "promptTriggers": {
-        "keywords": ["complex", "multi-step", "implement", "create", "add", "build", "feature", "continue", "resume", "dev docs", "development documentation", "commit", "committed"],
+        "keywords": ["complex", "multi-step", "implement", "create", "add", "build", "feature", "continue", "resume", "dev docs", "development documentation", "commit", "update dev docs", "update docs"],
         "intentPatterns": [
           "(implement|create|add|build).*feature",
           "(continue|resume).*work",
@@ -267,9 +267,11 @@
           "complex.*task",
           "multi.*step",
           "development.*documentation",
-          "got.*committed",
-          "just.*committed",
-          "i.*committed"
+          "update.*dev.*doc",
+          "update.*doc",
+          "commit.*change",
+          "go ahead.*commit",
+          "ready.*to.*commit"
         ]
       },
       "fileTriggers": {
@@ -362,23 +364,6 @@
       },
       "warnMessage": "Code review recommended before committing. Use code-architecture-reviewer Task agent for per-commit review, or code-review-local skill for thorough milestone reviews."
     },
-    "dev-docs-update": {
-      "type": "productivity",
-      "enforcement": "suggest",
-      "priority": "high",
-      "description": "Update existing dev documentation after committing, pushing, or completing work",
-      "promptTriggers": {
-        "keywords": ["commit", "push", "deploy", "ship", "merge"],
-        "intentPatterns": [
-          "commit.*push",
-          "push.*main",
-          "deploy.*backend",
-          "merge.*branch",
-          "ready.*to.*commit",
-          "ready.*to.*push"
-        ]
-      }
-    }
   },
   "skipMechanisms": {
     "commentTriggers": [
@@ -415,8 +400,8 @@
     "cacheExpiry": "10m"
   },
   "notes": {
-    "merged_from": "10 locally implemented skills (marketplace skills web-artifacts-builder and frontend-design removed - not locally implemented)",
-    "total_skills": 10,
+    "merged_from": "9 locally implemented skills (marketplace skills web-artifacts-builder and frontend-design removed - not locally implemented)",
+    "total_skills": 9,
     "review_strategy": "code-architecture-reviewer Task agent for per-commit reviews (fast, focused); code-review-local skill with 7 parallel agents for milestone/thorough reviews (comprehensive)",
     "enforcement_types": {
       "suggest": "Skill suggestion appears but doesn't block execution",
