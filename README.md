@@ -16,6 +16,7 @@ Born from 6 months of real-world use managing a complex TypeScript microservices
 - ✅ **Specialized agents** for complex tasks
 - ✅ **Dev docs system** that survives context resets
 - ✅ **Utility scripts** for provider switching and infrastructure management
+- ✅ **Browser automation** via Playwright CLI skill
 - ✅ **Comprehensive examples** using generic blog domain
 
 **Time investment to build:** 6 months of iteration
@@ -52,6 +53,7 @@ Browse the [skills catalog](.claude/skills/) and copy what you need.
 - **managing-dev-docs** - Track features across sessions (recommended: user-level)
 - **route-tester** - Test authenticated API routes
 - **error-tracking** - Sentry integration patterns
+- **playwright-cli** - Browser automation for testing and MR review
 - **dev-docs-update** - Update dev docs after commits/deploys
 
 **👉 [Skills Guide: .claude/skills/README.md](.claude/skills/README.md)**
@@ -73,6 +75,17 @@ Production-tested scripts for infrastructure management:
 - **claude-provider** - Switch between Anthropic and Z.AI providers with automatic backups
 
 **👉 [Scripts Guide: scripts/README.md](scripts/README.md)**
+
+### 🌐 I want browser automation
+
+Let Claude Code control a browser to test your app, review MRs, and automate workflows.
+
+**What you need:**
+1. Node.js with `npx` available
+2. Chrome installed
+3. 2 minutes
+
+**👉 [Browser Automation Setup](#browser-automation-playwright-cli)**
 
 ---
 
@@ -135,17 +148,21 @@ skill-name/
 
 ```
 .claude/
-├── skills/                 # 9 skills (some for user-level, some project-level)
+├── skills/                 # 10 skills (some for user-level, some project-level)
 │   ├── backend-dev-guidelines/  (12 resource files) [project-level]
 │   ├── frontend-dev-guidelines/ (11 resource files) [project-level]
+│   ├── playwright-cli/          (7 reference files) [user-level]
 │   ├── skill-developer/         (7 resource files) [user-level]
 │   ├── managing-dev-docs/       [user-level]
 │   ├── route-tester/            [project-level]
 │   ├── error-tracking/          [project-level]
 │   └── skill-rules.json    # Project-level skill activation config
 │
-│   Note: User-level skills (skill-developer, managing-dev-docs)
+│   Note: User-level skills (skill-developer, managing-dev-docs, playwright-cli)
 │   are in showcase as REFERENCE - users copy to ~/.claude/skills/
+├── other-skills/           # Stack-specific skills (reference only)
+│   ├── mixed-stack-guidelines/  [project-level]
+│   └── php-backend-dev-guidelines/ [project-level]
 ├── hooks/                  # 6 hooks for automation
 │   ├── skill-activation-prompt.*  (ESSENTIAL)
 │   ├── post-tool-use-tracker.sh   (ESSENTIAL)
@@ -172,7 +189,7 @@ dev/
 
 ## Component Catalog
 
-### 🎨 Skills (8)
+### 🎨 Skills (9)
 
 | Skill | Lines | Purpose | Best For | Location |
 |-------|-------|---------|----------|----------|
@@ -183,6 +200,7 @@ dev/
 | [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | 398 | React/MUI v7/TypeScript | React frontends | Project-level |
 | [**route-tester**](.claude/skills/route-tester/) | 389 | Testing authenticated routes | API testing | Project-level |
 | [**error-tracking**](.claude/skills/error-tracking/) | ~250 | Sentry integration | Error monitoring | Project-level |
+| [**playwright-cli**](.claude/skills/playwright-cli/) | ~280 | Browser automation via Playwright | Testing, MR review | User-level |
 | **dev-docs-update** | N/A | Triggers `/dev-docs-update` command reminder | Post-commit workflow | Slash command |
 
 **All skills follow the modular pattern** - main file + resource files for progressive disclosure.
@@ -340,6 +358,83 @@ Some hooks expect specific structures:
 - Add agents you find useful
 - Add slash commands
 - Customize Stop hooks (advanced)
+
+---
+
+## Browser Automation (Playwright CLI)
+
+Claude Code can control a browser to test your app, review MRs, fill forms, take screenshots, and more — all through natural language.
+
+### How It Works
+
+The [Playwright CLI](https://github.com/microsoft/playwright-cli) is a command-line tool from Microsoft that integrates with Claude Code as a **skill**. It's more token-efficient than MCP-based browser tools because it doesn't load large tool schemas into context.
+
+Claude runs commands like `playwright-cli goto`, `playwright-cli click e5`, `playwright-cli fill e3 "text"` via Bash, using element refs from accessibility snapshots.
+
+### Setup
+
+**Prerequisites:** Node.js with `npx`, Chrome installed
+
+```bash
+# From your project directory (or any directory)
+npx @playwright/cli install --skills
+```
+
+This creates `.claude/skills/playwright-cli/` in the current directory. For global availability, move it to your user-level skills:
+
+```bash
+mv .claude/skills/playwright-cli ~/.claude/skills/playwright-cli
+```
+
+### Updating
+
+Playwright CLI is an npm package — `npx` will pull the latest version automatically. If the skill files are updated by Microsoft, re-run the install:
+
+```bash
+npx @playwright/cli install --skills
+# Then move to ~/.claude/skills/ if using user-level
+```
+
+### Usage Examples
+
+**Testing an authenticated web app:**
+```
+You: "Open the dev site and test the edit form on the sheets page"
+Claude: Opens browser, you log in, Claude saves auth state,
+        navigates, edits fields, saves, verifies persistence
+```
+
+**Reviewing a coworker's MR:**
+```
+You: "Open Mike's dev site and check if the new dashboard widget renders correctly"
+Claude: Opens browser, navigates to the feature, takes snapshots,
+        reports what it finds
+```
+
+**Key commands Claude uses:**
+- `playwright-cli open <url>` — Launch browser (use `--headed` to see it)
+- `playwright-cli snapshot` — Get page structure with element refs
+- `playwright-cli click <ref>` / `fill <ref> <text>` — Interact with elements
+- `playwright-cli state-save auth.json` — Save login session for reuse
+- `playwright-cli network` / `console` — Debug requests and errors
+- `playwright-cli screenshot` — Capture visual state
+
+### Browser Support
+
+Supports **Chromium, Firefox, and WebKit**. Chrome is recommended for the smoothest experience. Brave may work (Chromium-based) but isn't officially supported.
+
+---
+
+## Other Skills (Stack-Specific)
+
+The `.claude/other-skills/` directory contains skills that are specific to particular technology stacks. These are provided as **reference implementations** — adapt them to your own stack.
+
+| Skill | Purpose | Stack |
+|-------|---------|-------|
+| [**mixed-stack-guidelines**](.claude/other-skills/mixed-stack-guidelines/) | Guidelines for projects mixing multiple backend/frontend technologies | Multi-language projects |
+| [**php-backend-dev-guidelines**](.claude/other-skills/php-backend-dev-guidelines/) | PHP backend development patterns | PHP/MongoDB |
+
+These are separated from the main skills catalog because they're tailored to specific workflows rather than being universally applicable.
 
 ---
 
