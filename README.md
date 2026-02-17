@@ -372,13 +372,7 @@ Three-file structure that survives context resets:
 **Background:**
 This infrastructure was detailed in ["Claude Code is a Beast – Tips from 6 Months of Hardcore Use"](https://www.reddit.com/r/ClaudeAI/comments/1oivjvm/claude_code_is_a_beast_tips_from_6_months_of/) on Reddit. After hundreds of requests, this showcase was created to help the community implement these patterns.
 
-**Recommended companion skills from [obra/superpowers](https://github.com/obra/superpowers):**
-- test-driven-development
-- systematic-debugging
-- dispatching-parallel-agents
-- using-git-worktrees
-- verification-before-completion
-- subagent-driven-development
+**Recommended companion skills:** See [RECOMMENDED_SKILLS.md](RECOMMENDED_SKILLS.md) for a curated list of community skills that complement this showcase, with an [install script](scripts/install-recommended-skills.sh) for standalone skills.
 
 ---
 
@@ -395,5 +389,6 @@ MIT License - Use freely in your projects, commercial or personal.
 - [Hooks Setup](.claude/hooks/README.md)
 - [Agents Guide](.claude/agents/README.md)
 - [Utility Scripts](scripts/README.md)
+- [Recommended Community Skills](RECOMMENDED_SKILLS.md)
 
 **Start here:** Copy the two essential hooks, add one skill, and see the auto-activation magic happen.
