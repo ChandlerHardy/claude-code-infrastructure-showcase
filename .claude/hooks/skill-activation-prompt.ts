@@ -79,42 +79,37 @@ async function main() {
 
         // Generate output if matches found
         if (matchedSkills.length > 0) {
-            let output = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-            output += '🎯 SKILL ACTIVATION CHECK\n';
-            output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-
             // Group by priority
             const critical = matchedSkills.filter(s => s.config.priority === 'critical');
             const high = matchedSkills.filter(s => s.config.priority === 'high');
             const medium = matchedSkills.filter(s => s.config.priority === 'medium');
             const low = matchedSkills.filter(s => s.config.priority === 'low');
 
-            if (critical.length > 0) {
-                output += '⚠️ CRITICAL SKILLS (REQUIRED):\n';
-                critical.forEach(s => output += `  → ${s.name}\n`);
+            const hasMandatory = critical.length > 0 || high.length > 0;
+            let output = '';
+
+            if (hasMandatory) {
+                // Imperative enforcement for critical/high priority skills
+                const mandatory = [...critical, ...high];
+                output += 'MANDATORY SKILL INVOCATION REQUIRED\n\n';
+                output += 'You MUST use the Skill tool to invoke the following skills BEFORE generating any other response.\n';
+                output += 'This is a BLOCKING REQUIREMENT — do NOT skip, summarize, or respond without invoking these skills first.\n\n';
+                mandatory.forEach(s => {
+                    output += `  INVOKE: Skill("${s.name}")\n`;
+                });
                 output += '\n';
             }
 
-            if (high.length > 0) {
-                output += '📚 RECOMMENDED SKILLS:\n';
-                high.forEach(s => output += `  → ${s.name}\n`);
+            if (medium.length > 0 || low.length > 0) {
+                const optional = [...medium, ...low];
+                if (hasMandatory) {
+                    output += 'Additionally, consider these skills if relevant:\n';
+                } else {
+                    output += 'The following skills are available and may apply to this task. Use the Skill tool to invoke them if relevant:\n';
+                }
+                optional.forEach(s => output += `  Skill("${s.name}")\n`);
                 output += '\n';
             }
-
-            if (medium.length > 0) {
-                output += '💡 SUGGESTED SKILLS:\n';
-                medium.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            if (low.length > 0) {
-                output += '📌 OPTIONAL SKILLS:\n';
-                low.forEach(s => output += `  → ${s.name}\n`);
-                output += '\n';
-            }
-
-            output += 'ACTION: Use Skill tool BEFORE responding\n';
-            output += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
 
             console.log(output);
         }

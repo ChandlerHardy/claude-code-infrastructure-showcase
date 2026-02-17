@@ -1,8 +1,10 @@
 ---
 name: code-review-local
-description: FreeBSD-compatible code review workflow. Use when completing tasks, implementing major features, or before merging to verify work meets requirements. Triggers on code review requests, merge preparation, and feature completion. Dispatches code-reviewer agent to review implementation against plan or requirements before proceeding.
-
-**This skill automatically dispatches the code-reviewer agent when invoked.**
+description: FreeBSD-compatible code review workflow. Use when completing tasks, implementing major features, or before merging to verify work meets requirements. Triggers on code review requests, merge preparation, and feature completion. Dispatches code-reviewer agent to review implementation against plan or requirements before proceeding. This skill automatically dispatches the code-reviewer agent when invoked.
+hooks:
+  Stop:
+    - type: prompt
+      prompt: "Before finishing, check if significant code changes were made during this session. If yes and no code review was performed, remind the user that a code review is recommended before committing. Suggest using the code-architecture-reviewer agent for a quick review."
 ---
 
 # Code Review Request

@@ -2,7 +2,7 @@
 
 **A curated reference library of production-tested Claude Code infrastructure.**
 
-Born from 6 months of real-world use managing a complex TypeScript microservices project, this showcase provides the patterns and systems that solved the "skills don't activate automatically" problem and scaled Claude Code for enterprise development.
+Born from 6+ months of real-world use and updated for Claude Code v2.1.3+, this showcase provides patterns and systems for skill auto-activation, safety guardrails, structured development workflows, and autonomous iteration — solving the core problem that skills don't activate on their own.
 
 > **This is NOT a working application** - it's a reference library. Copy what you need into your own projects.
 
@@ -10,27 +10,34 @@ Born from 6 months of real-world use managing a complex TypeScript microservices
 
 ## What's Inside
 
-**Production-tested infrastructure for:**
-- ✅ **Auto-activating skills** via hooks
-- ✅ **Modular skill pattern** (500-line rule with progressive disclosure)
-- ✅ **Specialized agents** for complex tasks
-- ✅ **Dev docs system** that survives context resets
-- ✅ **Utility scripts** for provider switching and infrastructure management
-- ✅ **Browser automation** via Playwright CLI skill
-- ✅ **Comprehensive examples** using generic blog domain
+### Core Infrastructure
+- **Auto-activating skills** via UserPromptSubmit hooks with imperative enforcement
+- **Modular skill pattern** (500-line rule with progressive disclosure)
+- **Specialized agents** for complex tasks
+- **Dev docs system** that survives context resets
+- **Skill frontmatter hooks** (`once: true`, `PreToolUse`, `Stop`) for distributed enforcement
 
-**Time investment to build:** 6 months of iteration
+### Official Anthropic Plugins
+- **hookify** — No-code safety guardrails via markdown config files
+- **feature-dev** — 7-phase structured development workflow with specialized agents
+- **ralph-loop** — Autonomous iteration via Stop hooks until completion criteria met
+
+### Community Patterns
+- **Browser automation** via Playwright CLI skill
+- **Comprehensive examples** using generic blog domain
+- **Utility scripts** for provider switching
+
 **Time to integrate into your project:** 15-30 minutes
 
 ---
 
 ## Quick Start - Pick Your Path
 
-### 🤖 Using Claude Code to Integrate?
+### Using Claude Code to Integrate?
 
-**Claude:** Read [`CLAUDE_INTEGRATION_GUIDE.md`](CLAUDE_INTEGRATION_GUIDE.md) for step-by-step integration instructions tailored for AI-assisted setup.
+Read [`CLAUDE_INTEGRATION_GUIDE.md`](CLAUDE_INTEGRATION_GUIDE.md) for step-by-step integration instructions tailored for AI-assisted setup.
 
-### 🎯 I want skill auto-activation
+### I want skill auto-activation
 
 **The breakthrough feature:** Skills that actually activate when you need them.
 
@@ -39,97 +46,106 @@ Born from 6 months of real-world use managing a complex TypeScript microservices
 2. A skill or two relevant to your work
 3. 15 minutes
 
-**👉 [Setup Guide: .claude/hooks/README.md](.claude/hooks/README.md)**
+**[Setup Guide: .claude/hooks/README.md](.claude/hooks/README.md)**
 
-### 📚 I want to add ONE skill
+### I want safety guardrails (hookify)
+
+Prevent dangerous behaviors (rm -rf, credential commits, etc.) with no-code markdown rules:
+
+```markdown
+---
+name: warn-dangerous-rm
+enabled: true
+event: bash
+pattern: rm\s+-rf
+---
+Dangerous rm command detected. Verify the path before proceeding.
+```
+
+**[Hookify Plugin: .claude/skills/hookify/](.claude/skills/hookify/)**
+
+### I want structured feature development
+
+7-phase workflow with specialized agents: Discovery → Exploration → Questions → Architecture → Implementation → Review → Summary.
+
+**[Feature Dev Plugin: .claude/skills/feature-dev/](.claude/skills/feature-dev/)**
+
+### I want autonomous iteration (ralph-loop)
+
+Uses Stop hooks to block Claude from finishing until completion criteria are met — self-referential feedback loops for autonomous task completion.
+
+**[Ralph Loop Plugin: .claude/skills/ralph-loop/](.claude/skills/ralph-loop/)**
+
+### I want to browse skills
 
 Browse the [skills catalog](.claude/skills/) and copy what you need.
 
-**Available:**
-- **backend-dev-guidelines** - Node.js/Express/TypeScript patterns
-- **frontend-dev-guidelines** - React/TypeScript/MUI v7 patterns
-- **code-review-local** - 7-agent code review pipeline (warn enforcement)
-- **skill-developer** - Meta-skill for creating skills (recommended: user-level)
-- **managing-dev-docs** - Track features across sessions (recommended: user-level)
-- **route-tester** - Test authenticated API routes
-- **error-tracking** - Sentry integration patterns
-- **playwright-cli** - Browser automation for testing and MR review
-- **dev-docs-update** - Update dev docs after commits/deploys
-
-**👉 [Skills Guide: .claude/skills/README.md](.claude/skills/README.md)**
-
-### 🤖 I want specialized agents
-
-10 production-tested agents for complex tasks:
-- Code architecture review
-- Refactoring assistance
-- Documentation generation
-- Error debugging
-- And more...
-
-**👉 [Agents Guide: .claude/agents/README.md](.claude/agents/README.md)**
-
-### 🔧 I want utility scripts
-
-Production-tested scripts for infrastructure management:
-- **claude-provider** - Switch between Anthropic and Z.AI providers with automatic backups
-
-**👉 [Scripts Guide: scripts/README.md](scripts/README.md)**
-
-### 🌐 I want browser automation
-
-Let Claude Code control a browser to test your app, review MRs, and automate workflows.
-
-**What you need:**
-1. Node.js with `npx` available
-2. Chrome installed
-3. 2 minutes
-
-**👉 [Browser Automation Setup](#browser-automation-playwright-cli)**
+**[Skills Guide: .claude/skills/README.md](.claude/skills/README.md)**
 
 ---
 
 ## What Makes This Different?
 
-### The Auto-Activation Breakthrough
+### Imperative Skill Enforcement (v2.0)
 
-**Problem:** Claude Code skills just sit there. You have to remember to use them.
+**Problem:** Passive skill suggestions ("consider using...") get ignored ~80% of the time.
 
-**Solution:** UserPromptSubmit hook that:
-- Analyzes your prompts
-- Checks file context
-- Automatically suggests relevant skills
-- Works via `skill-rules.json` configuration
+**Solution:** The UserPromptSubmit hook now uses imperative language for critical/high priority skills:
 
-**Result:** Skills activate when you need them, not when you remember them.
+```
+MANDATORY SKILL INVOCATION REQUIRED
+
+You MUST use the Skill tool to invoke the following skills BEFORE generating any other response.
+This is a BLOCKING REQUIREMENT — do NOT skip, summarize, or respond without invoking these skills first.
+
+  INVOKE: Skill("managing-dev-docs")
+```
+
+**Result:** ~80%+ activation rate, up from ~20% with passive suggestions.
+
+### Skill Frontmatter Hooks (v2.1.3+)
+
+Skills can now define their own hooks inline, bundling enforcement with the skill itself:
+
+```yaml
+---
+name: frontend-dev-guidelines
+description: React/TypeScript best practices
+once: true
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: prompt
+          prompt: "Verify MUI v7 patterns: Grid uses size={{}} prop, NOT xs/sm props."
+---
+```
+
+**Supported frontmatter fields:**
+- `once: true` — Only fire once per session (prevents nagging)
+- `hooks.PreToolUse` — Run before tool execution
+- `hooks.Stop` — Run when Claude tries to finish
+
+### Tightened Trigger Keywords (v2.0)
+
+**Problem:** Broad keywords like `"code"`, `"error"`, `"done"` caused skills to fire on nearly every prompt.
+
+**Solution:** Multi-word phrases that match intent, not individual words:
+
+| Before (too broad) | After (specific) |
+|-------------------|-----------------|
+| `"error"`, `"bug"`, `"debug"` | `"sentry"`, `"captureException"`, `"error tracking"` |
+| `"done"`, `"ready"`, `"go ahead"` | `"code review"`, `"review changes"`, `"review before commit"` |
+| `"code"`, `"development"` | `"design pattern"`, `"solid principles"` |
 
 ### Two-Tier Code Review Strategy
-
-**Problem:** Code reviews either don't happen (too manual) or are too heavy for every commit.
-
-**Solution:** Two-tier review system enforced via `code-review-local` skill (`warn` enforcement):
 
 | Tier | Tool | When | Speed |
 |------|------|------|-------|
 | **Per-commit** | `code-architecture-reviewer` Task agent | Every commit | ~30-60 seconds |
 | **Milestone** | `code-review-local` skill (7 parallel agents) | Phase completions, pre-deploy | ~3-5 minutes |
 
-The `code-review-local` skill is configured with `enforcement: "warn"` and `priority: "critical"`, so it actively warns whenever commit-related keywords appear. The warn message guides which tier to use.
-
-### Production-Tested Patterns
-
-These aren't theoretical examples - they're extracted from:
-- ✅ 6 microservices in production
-- ✅ 50,000+ lines of TypeScript
-- ✅ React frontend with complex data grids
-- ✅ Sophisticated workflow engine
-- ✅ 6 months of daily Claude Code use
-
-The patterns work because they solved real problems.
-
 ### Modular Skills (500-Line Rule)
-
-Large skills hit context limits. The solution:
 
 ```
 skill-name/
@@ -137,7 +153,6 @@ skill-name/
   resources/
     topic-1.md              # <500 lines each
     topic-2.md
-    topic-3.md
 ```
 
 **Progressive disclosure:** Claude loads main skill first, loads resources only when needed.
@@ -148,85 +163,95 @@ skill-name/
 
 ```
 .claude/
-├── skills/                 # 10 skills (some for user-level, some project-level)
-│   ├── backend-dev-guidelines/  (12 resource files) [project-level]
-│   ├── frontend-dev-guidelines/ (11 resource files) [project-level]
-│   ├── playwright-cli/          (7 reference files) [user-level]
-│   ├── skill-developer/         (7 resource files) [user-level]
-│   ├── managing-dev-docs/       [user-level]
-│   ├── route-tester/            [project-level]
-│   ├── error-tracking/          [project-level]
-│   └── skill-rules.json    # Project-level skill activation config
+├── skills/                     # Skills library
+│   ├── backend-dev-guidelines/      [project-level] (12 resources)
+│   ├── frontend-dev-guidelines/     [project-level] (11 resources, once: true + PreToolUse hook)
+│   ├── code-review-local/           [project-level] (Stop hook for review reminder)
+│   ├── error-tracking/              [project-level]
+│   ├── route-tester/                [project-level]
+│   ├── managing-dev-docs/           [user-level]
+│   ├── skill-developer/             [user-level] (7 resources)
+│   ├── playwright-cli/              [user-level] (7 references)
+│   ├── refactoring-patterns/        [project-level]
+│   ├── api-development/             [project-level]
+│   ├── general-development/         [project-level]
+│   │
+│   ├── hookify/                     [plugin] Safety guardrails system
+│   │   ├── hooks/                   Python hook handlers
+│   │   ├── core/                    Rule engine + config loader
+│   │   ├── commands/                /hookify, /hookify:list, /hookify:configure, /hookify:help
+│   │   ├── agents/                  conversation-analyzer
+│   │   ├── skills/writing-rules/    Rule authoring guide
+│   │   └── examples/               4 example rules
+│   │
+│   ├── feature-dev/                 [plugin] Structured development workflow
+│   │   ├── agents/                  code-explorer, code-architect, code-reviewer
+│   │   └── commands/                /feature-dev
+│   │
+│   ├── ralph-loop/                  [plugin] Autonomous iteration
+│   │   ├── hooks/                   Stop hook for completion checking
+│   │   ├── scripts/                 Setup script
+│   │   └── commands/                /ralph-loop, /cancel-ralph
+│   │
+│   └── skill-rules.json            Trigger configuration (v2.0)
 │
-│   Note: User-level skills (skill-developer, managing-dev-docs, playwright-cli)
-│   are in showcase as REFERENCE - users copy to ~/.claude/skills/
-├── other-skills/           # Stack-specific skills (reference only)
-│   ├── mixed-stack-guidelines/  [project-level]
-│   └── php-backend-dev-guidelines/ [project-level]
-├── hooks/                  # 6 hooks for automation
-│   ├── skill-activation-prompt.*  (ESSENTIAL)
-│   ├── post-tool-use-tracker.sh   (ESSENTIAL)
-│   ├── tsc-check.sh        (optional, needs customization)
-│   └── trigger-build-resolver.sh  (optional)
-├── agents/                 # 10 specialized agents
+├── other-skills/               # Stack-specific reference skills
+│   ├── mixed-stack-guidelines/
+│   └── php-backend-dev-guidelines/
+│
+├── hooks/                      # Core automation hooks
+│   ├── skill-activation-prompt.*    (ESSENTIAL - imperative enforcement)
+│   ├── post-tool-use-tracker.sh     (ESSENTIAL)
+│   └── optional/                    Stop hooks, build checks
+│
+├── agents/                     # 10+ specialized agents
 │   ├── code-architecture-reviewer.md
 │   ├── refactor-planner.md
-│   ├── frontend-error-fixer.md
-│   └── ... 7 more
-└── commands/               # 3 slash commands
+│   ├── web-research-specialist.md
+│   └── ...
+│
+└── commands/                   # Slash commands
     ├── dev-docs.md
-    └── ...
+    ├── dev-docs-update.md
+    └── route-research-for-testing.md
 
-scripts/                    # Utility scripts
-└── claude-provider         # Provider switcher (Anthropic/Z.AI)
-
-dev/
-└── active/                 # Dev docs pattern examples
-    └── public-infrastructure-repo/
+scripts/
+└── claude-provider             # Provider switcher (Anthropic/Z.AI)
 ```
 
 ---
 
 ## Component Catalog
 
-### 🎨 Skills (9)
+### Skills
 
-| Skill | Lines | Purpose | Best For | Location |
-|-------|-------|---------|----------|----------|
-| [**skill-developer**](.claude/skills/skill-developer/) | 426 | Creating and managing skills | Meta-development | User-level |
-| [**managing-dev-docs**](.claude/skills/managing-dev-docs/) | ~200 | Track features across sessions | Feature tracking | User-level |
-| [**code-review-local**](.claude/skills/code-review-local/) | ~210 | 7-agent code review pipeline | Pre-commit/milestone reviews | Project-level |
-| [**backend-dev-guidelines**](.claude/skills/backend-dev-guidelines/) | 304 | Express/Prisma/Sentry patterns | Backend APIs | Project-level |
-| [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | 398 | React/MUI v7/TypeScript | React frontends | Project-level |
-| [**route-tester**](.claude/skills/route-tester/) | 389 | Testing authenticated routes | API testing | Project-level |
-| [**error-tracking**](.claude/skills/error-tracking/) | ~250 | Sentry integration | Error monitoring | Project-level |
-| [**playwright-cli**](.claude/skills/playwright-cli/) | ~280 | Browser automation via Playwright | Testing, MR review | User-level |
-| **dev-docs-update** | N/A | Triggers `/dev-docs-update` command reminder | Post-commit workflow | Slash command |
+| Skill | Type | Purpose | Location |
+|-------|------|---------|----------|
+| [**hookify**](.claude/skills/hookify/) | Plugin | No-code safety guardrails via markdown rules | Project |
+| [**feature-dev**](.claude/skills/feature-dev/) | Plugin | 7-phase structured development with agents | Project |
+| [**ralph-loop**](.claude/skills/ralph-loop/) | Plugin | Autonomous iteration via Stop hooks | Project |
+| [**skill-developer**](.claude/skills/skill-developer/) | Meta | Creating and managing skills | User |
+| [**managing-dev-docs**](.claude/skills/managing-dev-docs/) | Productivity | Track features across sessions | User |
+| [**code-review-local**](.claude/skills/code-review-local/) | Quality | 7-agent code review pipeline | Project |
+| [**backend-dev-guidelines**](.claude/skills/backend-dev-guidelines/) | Domain | Express/Prisma/Sentry patterns | Project |
+| [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | Domain | React/MUI v7/TypeScript | Project |
+| [**route-tester**](.claude/skills/route-tester/) | Domain | Testing authenticated routes | Project |
+| [**error-tracking**](.claude/skills/error-tracking/) | Observability | Sentry integration | Project |
+| [**playwright-cli**](.claude/skills/playwright-cli/) | Automation | Browser testing via Playwright | User |
+| [**refactoring-patterns**](.claude/skills/refactoring-patterns/) | Quality | Code duplication & smell analysis | Project |
+| [**api-development**](.claude/skills/api-development/) | Domain | REST/GraphQL patterns | Project |
+| [**general-development**](.claude/skills/general-development/) | Domain | Language-agnostic best practices | Project |
 
-**All skills follow the modular pattern** - main file + resource files for progressive disclosure.
+### Hooks
 
-**⚠️ Important:** Skills marked "User-level" should be copied to `~/.claude/skills/` (available everywhere), not project `.claude/skills/`. The showcase includes them as reference for users to copy.
+| Hook | Event | Essential? | Description |
+|------|-------|-----------|-------------|
+| skill-activation-prompt | UserPromptSubmit | Yes | Imperative skill enforcement |
+| post-tool-use-tracker | PostToolUse | Yes | Track file changes |
+| hookify hooks | PreToolUse/PostToolUse/Stop | Optional | Safety guardrails (via hookify plugin) |
+| ralph-loop stop-hook | Stop | Optional | Autonomous iteration |
 
-**👉 [How to integrate skills →](.claude/skills/README.md)**
-
-### 🪝 Hooks (6)
-
-| Hook | Type | Essential? | Customization |
-|------|------|-----------|---------------|
-| skill-activation-prompt | UserPromptSubmit | ✅ YES | ✅ None needed |
-| post-tool-use-tracker | PostToolUse | ✅ YES | ✅ None needed |
-| tsc-check | Stop | ⚠️ Optional | ⚠️ Heavy - monorepo only |
-| trigger-build-resolver | Stop | ⚠️ Optional | ⚠️ Heavy - monorepo only |
-| error-handling-reminder | Stop | ⚠️ Optional | ⚠️ Moderate |
-| stop-build-check-enhanced | Stop | ⚠️ Optional | ⚠️ Moderate |
-
-**Start with the two essential hooks** - they enable skill auto-activation and work out of the box.
-
-**👉 [Hook setup guide →](.claude/hooks/README.md)**
-
-### 🤖 Agents (10)
-
-**Standalone - just copy and use!**
+### Agents (10+)
 
 | Agent | Purpose |
 |-------|---------|
@@ -237,29 +262,20 @@ dev/
 | plan-reviewer | Review development plans |
 | refactor-planner | Create refactoring strategies |
 | web-research-specialist | Research technical issues online |
-| auth-route-tester | Test authenticated endpoints |
-| auth-route-debugger | Debug auth issues |
-| auto-error-resolver | Auto-fix TypeScript errors |
+| conversation-analyzer | Analyze conversation for hookify rules |
+| code-explorer | Explore codebase for feature-dev |
+| code-architect | Design architecture for feature-dev |
 
-**👉 [How agents work →](.claude/agents/README.md)**
-
-### 💬 Slash Commands (3)
+### Slash Commands
 
 | Command | Purpose |
 |---------|---------|
 | /dev-docs | Create structured dev documentation |
 | /dev-docs-update | Update docs before context reset |
 | /route-research-for-testing | Research route patterns for testing |
-
-### 🔧 Utility Scripts (1)
-
-| Script | Purpose |
-|--------|---------|
-| claude-provider | Switch between API providers (Anthropic/Z.AI) with automatic backups |
-
-**Standalone - copy to ~/bin/ and use!**
-
-**👉 [Scripts guide →](scripts/README.md)**
+| /hookify | Create safety guardrail rules |
+| /feature-dev | Launch structured development workflow |
+| /ralph-loop | Start autonomous iteration loop |
 
 ---
 
@@ -267,213 +283,79 @@ dev/
 
 ### Hooks + skill-rules.json = Auto-Activation
 
-**The system:**
 1. **skill-activation-prompt hook** runs on every user prompt
-2. Checks **skill-rules.json** for trigger patterns
-3. Suggests relevant skills automatically
-4. Skills load only when needed
+2. Checks **skill-rules.json** for trigger patterns (keywords + intent regex)
+3. Critical/high priority skills get imperative "MUST invoke" enforcement
+4. Medium/low priority skills get advisory suggestions
+5. Skills load only when needed
 
-**⚠️ IMPORTANT**: skill-rules.json can be in TWO locations:
-- **Project-level:** `.claude/skills/skill-rules.json` (project-specific skills)
-- **User-level:** `~/.claude/skills/skill-rules.json` (global skills available everywhere)
+### Enforcement Hierarchy
 
-Some skills work better at user-level (skill-developer, managing-dev-docs) since they're useful across all projects.
+| Priority | Output Style | Example |
+|----------|-------------|---------|
+| critical | "MANDATORY... You MUST invoke" | managing-dev-docs |
+| high | "MANDATORY... You MUST invoke" | backend-dev-guidelines |
+| medium | "Consider these skills if relevant" | general-development |
+| low | "Consider these skills if relevant" | (advisory only) |
 
-**This solves the #1 problem** with Claude Code skills: they don't activate on their own.
+### Skill Frontmatter Hooks
 
-### Progressive Disclosure (500-Line Rule)
-
-**Problem:** Large skills hit context limits
-
-**Solution:** Modular structure
-- Main SKILL.md <500 lines (overview + navigation)
-- Resource files <500 lines each (deep dives)
-- Claude loads incrementally as needed
-
-**Example:** backend-dev-guidelines has 12 resource files covering routing, controllers, services, repositories, testing, etc.
+Skills can self-enforce via inline hooks (v2.1.3+):
+- **`once: true`** — Fire only once per session
+- **`PreToolUse`** — Check before file edits
+- **`Stop`** — Verify before session ends
 
 ### Dev Docs Pattern
 
-**Problem:** Context resets lose project context
-
-**Solution:** Three-file structure
-- `[task]-plan.md` - Strategic plan
-- `[task]-context.md` - Key decisions and files
-- `[task]-tasks.md` - Checklist format
-
-**Works with:** `/dev-docs` slash command to generate these automatically
-
----
-
-## ⚠️ Important: What Won't Work As-Is
-
-### settings.json
-The included `settings.json` is an **example only**:
-- Stop hooks reference specific monorepo structure
-- Service names (blog-api, etc.) are examples
-- MCP servers may not exist in your setup
-
-**To use it:**
-1. Extract ONLY UserPromptSubmit and PostToolUse hooks
-2. Customize or skip Stop hooks
-3. Update MCP server list for your setup
-
-### Blog Domain Examples
-Skills use generic blog examples (Post/Comment/User):
-- These are **teaching examples**, not requirements
-- Patterns work for any domain (e-commerce, SaaS, etc.)
-- Adapt the patterns to your business logic
-
-### Hook Directory Structures
-Some hooks expect specific structures:
-- `tsc-check.sh` expects service directories
-- Customize based on YOUR project layout
+Three-file structure that survives context resets:
+- `plan.md` - Strategic plan
+- `context.md` - Key decisions and files
+- `tasks.md` - Checklist format
 
 ---
 
 ## Integration Workflow
 
-**Recommended approach:**
-
 ### Phase 1: Skill Activation (15 min)
-1. Copy skill-activation-prompt hook
+1. Copy skill-activation-prompt hook files
 2. Copy post-tool-use-tracker hook
-3. **⚠️ CRITICAL**: Copy skill-rules.json to `.claude/skills/` (NOT `.claude/`)
-   - OR create user-level `~/.claude/skills/skill-rules.json` for global skills
-4. Update settings.json
-5. Install hook dependencies
+3. Copy skill-rules.json to `.claude/skills/`
+4. Update settings.json with hook paths
+5. Install hook dependencies (`npm install` in hooks dir)
 
 ### Phase 2: Add First Skill (10 min)
 1. Pick ONE relevant skill
-2. Copy skill directory (to project or user level as appropriate)
-3. Create/update skill-rules.json (project or user level)
-4. Customize path patterns (project-level skills only)
+2. Copy skill directory
+3. Customize path patterns if needed
 
-### Phase 3: Test & Iterate (5 min)
-1. Edit a file - skill should activate
-2. Ask a question - skill should be suggested
-3. Add more skills as needed
-
-### Phase 4: Optional Enhancements
-- Add agents you find useful
-- Add slash commands
-- Customize Stop hooks (advanced)
+### Phase 3: Optional Enhancements
+- Add hookify for safety guardrails
+- Add feature-dev for structured workflows
+- Add ralph-loop for autonomous iteration
+- Add agents for complex tasks
 
 ---
 
-## Browser Automation (Playwright CLI)
+## What Won't Work As-Is
 
-Claude Code can control a browser to test your app, review MRs, fill forms, take screenshots, and more — all through natural language.
-
-### How It Works
-
-The [Playwright CLI](https://github.com/microsoft/playwright-cli) is a command-line tool from Microsoft that integrates with Claude Code as a **skill**. It's more token-efficient than MCP-based browser tools because it doesn't load large tool schemas into context.
-
-Claude runs commands like `playwright-cli goto`, `playwright-cli click e5`, `playwright-cli fill e3 "text"` via Bash, using element refs from accessibility snapshots.
-
-### Setup
-
-**Prerequisites:** Node.js with `npx`, Chrome installed
-
-```bash
-# From your project directory (or any directory)
-npx @playwright/cli install --skills
-```
-
-This creates `.claude/skills/playwright-cli/` in the current directory. For global availability, move it to your user-level skills:
-
-```bash
-mv .claude/skills/playwright-cli ~/.claude/skills/playwright-cli
-```
-
-### Updating
-
-Playwright CLI is an npm package — `npx` will pull the latest version automatically. If the skill files are updated by Microsoft, re-run the install:
-
-```bash
-npx @playwright/cli install --skills
-# Then move to ~/.claude/skills/ if using user-level
-```
-
-### Usage Examples
-
-**Testing an authenticated web app:**
-```
-You: "Open the dev site and test the edit form on the sheets page"
-Claude: Opens browser, you log in, Claude saves auth state,
-        navigates, edits fields, saves, verifies persistence
-```
-
-**Reviewing a coworker's MR:**
-```
-You: "Open Mike's dev site and check if the new dashboard widget renders correctly"
-Claude: Opens browser, navigates to the feature, takes snapshots,
-        reports what it finds
-```
-
-**Key commands Claude uses:**
-- `playwright-cli open <url>` — Launch browser (use `--headed` to see it)
-- `playwright-cli snapshot` — Get page structure with element refs
-- `playwright-cli click <ref>` / `fill <ref> <text>` — Interact with elements
-- `playwright-cli state-save auth.json` — Save login session for reuse
-- `playwright-cli network` / `console` — Debug requests and errors
-- `playwright-cli screenshot` — Capture visual state
-
-### Browser Support
-
-Supports **Chromium, Firefox, and WebKit**. Chrome is recommended for the smoothest experience. Brave may work (Chromium-based) but isn't officially supported.
-
----
-
-## Other Skills (Stack-Specific)
-
-The `.claude/other-skills/` directory contains skills that are specific to particular technology stacks. These are provided as **reference implementations** — adapt them to your own stack.
-
-| Skill | Purpose | Stack |
-|-------|---------|-------|
-| [**mixed-stack-guidelines**](.claude/other-skills/mixed-stack-guidelines/) | Guidelines for projects mixing multiple backend/frontend technologies | Multi-language projects |
-| [**php-backend-dev-guidelines**](.claude/other-skills/php-backend-dev-guidelines/) | PHP backend development patterns | PHP/MongoDB |
-
-These are separated from the main skills catalog because they're tailored to specific workflows rather than being universally applicable.
-
----
-
-## Getting Help
-
-### For Users
-**Issues with integration?**
-1. Check [CLAUDE_INTEGRATION_GUIDE.md](CLAUDE_INTEGRATION_GUIDE.md)
-2. Ask Claude: "Why isn't [skill] activating?"
-3. Open an issue with your project structure
-
-### For Claude Code
-When helping users integrate:
-1. **Read CLAUDE_INTEGRATION_GUIDE.md FIRST**
-2. Ask about their project structure
-3. Customize, don't blindly copy
-4. Verify after integration
+- **settings.json** — Example only, references example services
+- **Blog domain examples** — Teaching examples, adapt to your domain
+- **Stop hooks** — Expect specific monorepo structure, customize for yours
+- **Stack-specific skills** — Node.js/Express/React patterns, adapt for your stack
 
 ---
 
 ## What This Solves
 
-### Before This Infrastructure
-
-❌ Skills don't activate automatically
-❌ Have to remember which skill to use
-❌ Large skills hit context limits
-❌ Context resets lose project knowledge
-❌ No consistency across development
-❌ Manual agent invocation every time
-
-### After This Infrastructure
-
-✅ Skills suggest themselves based on context
-✅ Hooks trigger skills at the right time
-✅ Modular skills stay under context limits
-✅ Dev docs preserve knowledge across resets
-✅ Consistent patterns via guardrails
-✅ Agents streamline complex tasks
+| Before | After |
+|--------|-------|
+| Skills don't activate automatically | Skills suggest themselves with imperative enforcement |
+| Have to remember which skill to use | Hooks trigger skills at the right time |
+| Large skills hit context limits | Modular skills stay under context limits |
+| Context resets lose project knowledge | Dev docs preserve knowledge across resets |
+| No safety guardrails | hookify prevents dangerous operations |
+| Manual step-by-step development | feature-dev structures the workflow |
+| No way to enforce completion criteria | ralph-loop iterates until done |
 
 ---
 
@@ -481,14 +363,21 @@ When helping users integrate:
 
 **Found this useful?**
 
-- ⭐ Star this repo
-- 🐛 Report issues or suggest improvements
-- 💬 Share your own skills/hooks/agents
-- 📝 Contribute examples from your domain
+- Star this repo
+- Report issues or suggest improvements
+- Share your own skills/hooks/agents
+- Contribute examples from your domain
 
 **Background:**
-This infrastructure was detailed in a post I made to Reddit ["Claude Code is a Beast – Tips from 6 Months of Hardcore Use"](https://www.reddit.com/r/ClaudeAI/comments/1oivjvm/claude_code_is_a_beast_tips_from_6_months_of/). After hundreds of requests, this showcase was created to help the community implement these patterns.
+This infrastructure was detailed in ["Claude Code is a Beast – Tips from 6 Months of Hardcore Use"](https://www.reddit.com/r/ClaudeAI/comments/1oivjvm/claude_code_is_a_beast_tips_from_6_months_of/) on Reddit. After hundreds of requests, this showcase was created to help the community implement these patterns.
 
+**Recommended companion skills from [obra/superpowers](https://github.com/obra/superpowers):**
+- test-driven-development
+- systematic-debugging
+- dispatching-parallel-agents
+- using-git-worktrees
+- verification-before-completion
+- subagent-driven-development
 
 ---
 
@@ -500,11 +389,10 @@ MIT License - Use freely in your projects, commercial or personal.
 
 ## Quick Links
 
-- 📖 [Claude Integration Guide](CLAUDE_INTEGRATION_GUIDE.md) - For AI-assisted setup
-- 🎨 [Skills Documentation](.claude/skills/README.md)
-- 🪝 [Hooks Setup](.claude/hooks/README.md)
-- 🤖 [Agents Guide](.claude/agents/README.md)
-- 🔧 [Utility Scripts](scripts/README.md)
-- 📝 [Dev Docs Pattern](dev/README.md)
+- [Claude Integration Guide](CLAUDE_INTEGRATION_GUIDE.md) - For AI-assisted setup
+- [Skills Documentation](.claude/skills/README.md)
+- [Hooks Setup](.claude/hooks/README.md)
+- [Agents Guide](.claude/agents/README.md)
+- [Utility Scripts](scripts/README.md)
 
 **Start here:** Copy the two essential hooks, add one skill, and see the auto-activation magic happen.

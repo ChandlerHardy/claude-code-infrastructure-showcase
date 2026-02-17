@@ -1,6 +1,13 @@
 ---
 name: frontend-dev-guidelines
 description: Frontend development guidelines for React/TypeScript applications. Modern patterns including Suspense, lazy loading, useSuspenseQuery, file organization with features directory, MUI v7 styling, TanStack Router, performance optimization, and TypeScript best practices. Use when creating components, pages, features, fetching data, styling, routing, or working with frontend code.
+once: true
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: prompt
+          prompt: "If the file being edited is a .tsx or .jsx component, verify MUI v7 patterns: Grid uses size={{}} prop (NOT xs/sm props), use sx prop for styling (NOT makeStyles), import from @mui/material (NOT @material-ui/core)."
 ---
 
 # Frontend Development Guidelines
