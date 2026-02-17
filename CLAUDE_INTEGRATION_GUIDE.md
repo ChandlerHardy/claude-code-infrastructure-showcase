@@ -10,10 +10,27 @@ This repository is a **reference library** of Claude Code infrastructure compone
 
 1. **Ask clarifying questions** about their project structure
 2. **Copy the appropriate files**
-3. **Customize configurations** for their setup
+3. **Customize content** for their setup
 4. **Verify the integration** works correctly
 
 **Key Principle:** ALWAYS ask before assuming project structure. What works for one project won't work for another.
+
+---
+
+## How Skills Work
+
+Skills activate via their **frontmatter description**. No config files, no hooks needed for activation.
+
+```yaml
+---
+name: my-skill
+description: Use when [specific scenarios]. Triggers on [keywords]. [What it does].
+---
+
+# Skill content here...
+```
+
+Claude sees the description in its system prompt and invokes the skill when the user's prompt matches.
 
 ---
 
@@ -23,75 +40,27 @@ This repository is a **reference library** of Claude Code infrastructure compone
 
 ### Frontend Skills
 
-**frontend-dev-guidelines requires:**
-- React (18+)
-- MUI v7
-- TanStack Query
-- TanStack Router
-- TypeScript
+**frontend-dev-guidelines requires:** React (18+), MUI v7, TanStack Query/Router, TypeScript
 
-**Before integrating, ask:**
-"Do you use React with MUI v7?"
+**Before integrating, ask:** "Do you use React with MUI v7?"
 
-**If NO:**
-```
-The frontend-dev-guidelines skill is designed specifically for React + MUI v7. I can:
-1. Help you create a similar skill adapted for [their stack] using this as a template
-2. Extract the framework-agnostic patterns (file organization, performance, etc.)
-3. Skip this skill if not relevant
-
-Which would you prefer?
-```
+**If NO:** Offer to adapt the skill as a template for their stack, extract framework-agnostic patterns, or skip.
 
 ### Backend Skills
 
-**backend-dev-guidelines requires:**
-- Node.js/Express
-- TypeScript
-- Prisma ORM
-- Sentry
+**backend-dev-guidelines requires:** Node.js/Express, TypeScript, Prisma ORM, Sentry
 
-**Before integrating, ask:**
-"Do you use Node.js with Express and Prisma?"
+**Before integrating, ask:** "Do you use Node.js with Express and Prisma?"
 
-**If NO:**
-```
-The backend-dev-guidelines skill is designed for Express/Prisma. I can:
-1. Help you create similar guidelines adapted for [their stack] using this as a template
-2. Extract the architecture patterns (layered architecture works for any framework)
-3. Skip this skill
+**If NO:** Offer to adapt for their stack or extract architecture patterns (layered architecture works for any framework).
 
-Which would you prefer?
-```
+### Tech-Agnostic Skills (Copy As-Is)
 
-### Skills That Are Tech-Agnostic
-
-These work for ANY tech stack:
-- ✅ **skill-developer** - Meta-skill, no tech requirements
-- ✅ **managing-dev-docs** - Feature tracking across sessions, no tech requirements
-- ✅ **code-review-local** - 7-agent code review pipeline, no tech requirements
-- ✅ **dev-docs-update** - Triggers `/dev-docs-update` command reminder after commits
-- ✅ **route-tester** - Only requires JWT cookie auth (framework agnostic)
-- ✅ **error-tracking** - Sentry works with most stacks
-
-**Recommended for user-level (~/.claude/skills/):**
-- skill-developer
-- managing-dev-docs
-- managing-dev-docs
-
----
-
-## General Integration Pattern
-
-When user says: **"Add [component] to my project"**
-
-1. Identify component type (skill/hook/agent/command)
-2. **CHECK TECH STACK COMPATIBILITY** (for frontend/backend skills)
-3. Ask about their project structure
-4. Copy files OR adapt for their stack
-5. Customize for their setup
-6. Verify integration
-7. Provide next steps
+- **skill-developer** — Meta-skill, no tech requirements
+- **managing-dev-docs** — Feature tracking across sessions
+- **code-review-local** — 7-agent code review pipeline
+- **refactoring-patterns** — Code duplication analysis
+- **playwright-cli** — Browser automation
 
 ---
 
@@ -99,11 +68,9 @@ When user says: **"Add [component] to my project"**
 
 ### Step-by-Step Process
 
-**When user requests a skill** (e.g., "add backend-dev-guidelines"):
-
 #### 1. Understand Their Project
 
-**ASK THESE QUESTIONS:**
+**ASK:**
 - "What's your project structure? Single app, monorepo, or multi-service?"
 - "Where is your [backend/frontend] code located?"
 - "What frameworks/technologies do you use?"
@@ -112,355 +79,89 @@ When user says: **"Add [component] to my project"**
 
 **For project-specific skills:**
 ```bash
-cp -r /path/to/showcase/.claude/skills/[skill-name] \\
+cp -r /path/to/showcase/.claude/skills/[skill-name] \
       $CLAUDE_PROJECT_DIR/.claude/skills/
 ```
 
 **For user-level skills (managing-dev-docs, skill-developer):**
 ```bash
-cp -r /path/to/showcase/.claude/skills/[skill-name] \\
+cp -r /path/to/showcase/.claude/skills/[skill-name] \
       ~/.claude/skills/
 ```
 
-**Important:** The showcase contains ALL skills as reference, but some (like managing-dev-docs) are meant to be installed at user-level, not project-level.
+#### 3. Customize Content
 
-#### 3. Handle skill-rules.json
+If the skill references specific tech that doesn't match the user's stack, adapt the content. The frontmatter description may also need updating to reflect their domain.
 
-**IMPORTANT:** There are TWO possible locations for skill-rules.json:
-- **Project-level:** `$CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json` (project-specific skills)
-- **User-level:** `~/.claude/skills/skill-rules.json` (global skills available everywhere)
-
-**Check which exists:**
-```bash
-ls $CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json
-ls ~/.claude/skills/skill-rules.json
-```
-
-**For project-specific skills:**
-
-**If NO (doesn't exist):**
-- Copy the template from showcase
-- Remove skills user doesn't want
-- Customize for their project
-
-**If YES (exists):**
-- Read their current skill-rules.json
-- Add the new skill entry
-- Merge carefully to avoid breaking existing skills
-
-**For user-level global skills:**
-
-Some skills are better suited for user-level configuration because they're useful across ALL projects:
-- `managing-dev-docs` - Feature tracking across sessions (works for any project)
-- `skill-developer` - Meta-skill for creating skills (useful everywhere)
-- `managing-dev-docs` - Doc updates reminder (applies to all projects)
-
-**To add a skill at user-level:**
-```bash
-# Check if user-level skill-rules.json exists
-if [ ! -f ~/.claude/skills/skill-rules.json ]; then
-  # Create it with base structure
-  mkdir -p ~/.claude/skills
-  echo '{"version": "1.0.0", "skills": {}}' > ~/.claude/skills/skill-rules.json
-fi
-
-# Add the skill entry to the "skills" object
-# (merge with existing skills, don't overwrite)
-```
-
-#### 4. Customize Path Patterns
-
-**CRITICAL:** Update `pathPatterns` in skill-rules.json to match THEIR structure:
-
-**Example - User has monorepo:**
-```json
-{
-  "backend-dev-guidelines": {
-    "fileTriggers": {
-      "pathPatterns": [
-        "packages/api/src/**/*.ts",
-        "packages/server/src/**/*.ts",
-        "apps/backend/**/*.ts"
-      ]
-    }
-  }
-}
-```
-
-**Example - User has single backend:**
-```json
-{
-  "backend-dev-guidelines": {
-    "fileTriggers": {
-      "pathPatterns": [
-        "src/**/*.ts",
-        "backend/**/*.ts"
-      ]
-    }
-  }
-}
-```
-
-**Safe Generic Patterns** (when unsure):
-```json
-{
-  "pathPatterns": [
-    "**/*.ts",          // All TypeScript files
-    "src/**/*.ts",      // Common src directory
-    "backend/**/*.ts"   // Common backend directory
-  ]
-}
-```
-
-#### 5. Verify Integration
+#### 4. Verify
 
 ```bash
 # Check skill was copied
-ls -la $CLAUDE_PROJECT_DIR/.claude/skills/[skill-name]
+ls -la $CLAUDE_PROJECT_DIR/.claude/skills/[skill-name]/SKILL.md
 
-# Validate skill-rules.json syntax
-cat $CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json | jq .
+# Restart Claude Code to pick up new skills
 ```
 
-**Tell user:** "Try editing a file in [their-backend-path] and the skill should activate."
+**Tell user:** "Restart Claude Code, then try prompting with relevant keywords to verify the skill activates."
 
 ---
 
-### Skill-Specific Notes
+## Skill-Specific Notes
 
-#### backend-dev-guidelines
-- **Tech Requirements:** Node.js/Express, Prisma, TypeScript, Sentry
-- **Ask:** "Do you use Express with Prisma?" "Where's your backend code?"
-- **If different stack:** Offer to adapt using this as template
-- **Customize:** pathPatterns
-- **Example paths:** `api/`, `server/`, `backend/`, `services/*/src/`
-- **Adaptation tip:** Architecture patterns (Routes→Controllers→Services) transfer to most frameworks
-
-#### frontend-dev-guidelines
-- **Tech Requirements:** React 18+, MUI v7, TanStack Query/Router, TypeScript
-- **Ask:** "Do you use React with MUI v7?" "Where's your frontend code?"
-- **If different stack:** Offer to create adapted version (Vue, Angular, etc.)
-- **Customize:** pathPatterns + all framework-specific examples
-- **Example paths:** `frontend/`, `client/`, `web/`, `apps/web/src/`
-- **Adaptation tip:** File organization and performance patterns transfer, component code doesn't
-
-#### route-tester
-- **Tech Requirements:** JWT cookie-based authentication (framework agnostic)
-- **Ask:** "Do you use JWT cookie-based authentication?"
-- **If NO:** "This skill is designed for JWT cookies. Want me to adapt it for [their auth type] or skip it?"
-- **Customize:** Service URLs, auth patterns
-- **Works with:** Any backend framework using JWT cookies
-
-#### error-tracking
-- **Tech Requirements:** Sentry (works with most backends)
-- **Ask:** "Do you use Sentry?" "Where's your backend code?"
-- **If NO Sentry:** "Want to use this as template for [their error tracking]?"
-- **Customize:** pathPatterns
-- **Adaptation tip:** Error tracking philosophy transfers to other tools (Rollbar, Bugsnag, etc.)
-
-#### skill-developer
-- **Tech Requirements:** None!
-- **Copy as-is** - meta-skill, fully generic, teaches skill creation for ANY tech stack
-- **Recommended location:** User-level (`~/.claude/skills/skill-rules.json`) - useful across all projects
-
-#### managing-dev-docs
-- **Tech Requirements:** None!
-- **Purpose:** Tracks complex features across sessions using dev docs (plan.md, context.md, tasks.md)
-- **Copy as-is** - fully generic, works for any project or tech stack
-- **Recommended location:** User-level (`~/.claude/skills/skill-rules.json`) - useful across all projects
-- **Where docs are stored:** `~/.claude/dev-docs/` by default
-- **Ask:** "Do you work on complex features that span multiple sessions?"
+| Skill | Requirements | Ask Before Integrating |
+|-------|-------------|----------------------|
+| **backend-dev-guidelines** | Express/Prisma/Sentry | "Do you use Express with Prisma?" |
+| **frontend-dev-guidelines** | React/MUI v7/TanStack | "Do you use React with MUI v7?" |
+| **route-tester** | JWT cookie auth | "Do you use JWT cookie-based authentication?" |
+| **error-tracking** | Sentry | "Do you use Sentry?" |
+| **skill-developer** | None | Copy as-is |
+| **managing-dev-docs** | None | Copy as-is |
+| **code-review-local** | None | Copy as-is |
+| **refactoring-patterns** | None | Copy as-is |
+| **playwright-cli** | None | Copy as-is |
 
 ---
 
 ## Adapting Skills for Different Tech Stacks
 
-When user's tech stack differs from skill requirements, you have options:
-
 ### Option 1: Adapt Existing Skill (Recommended)
 
-**When to use:** User wants similar guidelines but for different tech
-
-**Process:**
-1. **Copy the skill as a starting point:**
-   ```bash
-   cp -r showcase/.claude/skills/frontend-dev-guidelines \\
-         $CLAUDE_PROJECT_DIR/.claude/skills/vue-dev-guidelines
-   ```
-
-2. **Identify what needs changing:**
-   - Framework-specific code examples (React → Vue)
-   - Library APIs (MUI → Vuetify/PrimeVue)
-   - Import statements
-   - Component patterns
-
-3. **Keep what transfers:**
-   - File organization principles
-   - Performance optimization strategies
-   - TypeScript standards
-   - General best practices
-
-4. **Replace examples systematically:**
-   - Ask user for equivalent patterns in their stack
-   - Update code examples to their framework
-   - Keep the overall structure and sections
-
-5. **Update skill name and triggers:**
-   - Rename skill appropriately
-   - Update skill-rules.json triggers for their stack
-   - Test activation
-
-**Example - Adapting frontend-dev-guidelines for Vue:**
-```
-I'll create vue-dev-guidelines based on the React skill structure:
-- Replace React.FC → Vue defineComponent
-- Replace useSuspenseQuery → Vue composables
-- Replace MUI components → [their component library]
-- Keep: File organization, performance patterns, TypeScript guidelines
-
-This will take a few minutes. Sound good?
-```
+1. Copy the skill as a starting point
+2. Keep framework-agnostic patterns (file organization, architecture, testing strategy)
+3. Replace framework-specific code examples
+4. Update the frontmatter description for the new stack
 
 ### Option 2: Extract Framework-Agnostic Patterns
 
-**When to use:** Stacks are very different, but core principles apply
-
-**Process:**
-1. Read through the existing skill
-2. Identify framework-agnostic patterns:
-   - Layered architecture (backend)
-   - File organization strategies
-   - Performance optimization principles
-   - Testing strategies
-   - Error handling philosophy
-
-3. Create new skill with just those patterns
-4. User can add framework-specific examples later
-
-**Example:**
-```
-The backend-dev-guidelines uses Express, but the layered architecture
-(Routes → Controllers → Services → Repositories) works for Django too.
-
-I can create a skill with:
-- Layered architecture pattern
-- Separation of concerns principles
-- Error handling best practices
+Create a new skill with just the transferable patterns:
+- Layered architecture (Routes > Controllers > Services)
+- Separation of concerns
+- Error handling philosophy
 - Testing strategies
 
-Then you can add Django-specific examples as you establish patterns.
-```
+### What Transfers Across Stacks
 
-### Option 3: Use as Reference Only
-
-**When to use:** Too different to adapt, but user wants inspiration
-
-**Process:**
-1. User browses the existing skill
-2. You help create a new skill from scratch
-3. Use existing skill's structure as a template
-4. Follow modular pattern (main + resource files)
-
-### What Usually Transfers Across Tech Stacks
-
-**Architecture & Organization:**
-- ✅ Layered architecture (Routes/Controllers/Services pattern)
-- ✅ Separation of concerns
-- ✅ File organization strategies (features/ pattern)
-- ✅ Progressive disclosure (main + resource files)
-- ✅ Repository pattern for data access
-
-**Development Practices:**
-- ✅ Error handling philosophy
-- ✅ Input validation importance
-- ✅ Testing strategies
-- ✅ Performance optimization principles
-- ✅ TypeScript best practices
-
-**Framework-Specific Code:**
-- ❌ React hooks → Don't transfer to Vue/Angular
-- ❌ MUI components → Different component libraries
-- ❌ Prisma queries → Different ORM syntax
-- ❌ Express middleware → Different framework patterns
-- ❌ Routing implementations → Framework-specific
-
-### When to Recommend Adaptation vs Skipping
-
-**Recommend adaptation if:**
-- User wants similar guidelines for their stack
-- Core patterns apply (layered architecture, etc.)
-- User has time to help with framework-specific examples
-
-**Recommend skipping if:**
-- Stacks are completely different
-- User doesn't need those patterns
-- Would take too long to adapt
-- User prefers creating from scratch
+| Transfers | Doesn't Transfer |
+|-----------|-----------------|
+| Layered architecture | React hooks |
+| File organization patterns | MUI components |
+| Testing strategies | Prisma query syntax |
+| Error handling philosophy | Express middleware |
+| TypeScript best practices | Framework-specific routing |
 
 ---
 
-## Integrating Hooks
+## Integrating Hooks (Optional)
 
-### Essential Hooks (Always Safe to Copy)
+Hooks are **not required for skill activation** but are useful for utility purposes.
 
-#### skill-activation-prompt (UserPromptSubmit)
+### Utility Hooks (Safe to Copy)
 
-**Purpose:** Auto-suggests skills based on user prompts
-
-**Integration (NO customization needed):**
-
-```bash
-# Copy both files
-cp showcase/.claude/hooks/skill-activation-prompt.sh \\
-   $CLAUDE_PROJECT_DIR/.claude/hooks/
-cp showcase/.claude/hooks/skill-activation-prompt.ts \\
-   $CLAUDE_PROJECT_DIR/.claude/hooks/
-
-# Make executable
-chmod +x $CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.sh
-
-# Install dependencies if needed
-if [ -f "showcase/.claude/hooks/package.json" ]; then
-  cp showcase/.claude/hooks/package.json \\
-     $CLAUDE_PROJECT_DIR/.claude/hooks/
-  cd $CLAUDE_PROJECT_DIR/.claude/hooks && npm install
-fi
-```
-
-**Add to settings.json:**
-```json
-{
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.sh"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
-**This hook is FULLY GENERIC** - works anywhere, no customization needed!
-
-#### post-tool-use-tracker (PostToolUse)
-
-**Purpose:** Tracks file changes for context management
-
-**Integration (NO customization needed):**
-
-```bash
-# Copy file
-cp showcase/.claude/hooks/post-tool-use-tracker.sh \\
-   $CLAUDE_PROJECT_DIR/.claude/hooks/
-
-# Make executable
-chmod +x $CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use-tracker.sh
-```
+| Hook | Purpose | Customization |
+|------|---------|--------------|
+| **post-tool-use-tracker.sh** | Tracks edited files for dev docs | None needed |
+| **dev-docs-stop-hook.sh** | Reminds about dev doc updates | None needed |
+| **dev-docs-branch-init.sh** | Detects feature branches on start | None needed |
 
 **Add to settings.json:**
 ```json
@@ -476,198 +177,23 @@ chmod +x $CLAUDE_PROJECT_DIR/.claude/hooks/post-tool-use-tracker.sh
           }
         ]
       }
-    ]
-  }
-}
-```
-
-**This hook is FULLY GENERIC** - auto-detects project structure!
-
----
-
-### Optional Hooks (Require Heavy Customization)
-
-#### tsc-check.sh and trigger-build-resolver.sh (Stop hooks)
-
-⚠️ **WARNING:** These hooks are configured for a specific multi-service monorepo structure.
-
-**Before integrating, ask:**
-1. "Do you have a monorepo with multiple TypeScript services?"
-2. "What are your service directory names?"
-3. "Where are your tsconfig.json files located?"
-
-**For SIMPLE projects (single service):**
-- **RECOMMEND SKIPPING** these hooks
-- They're overkill for single-service projects
-- User can run `tsc --noEmit` manually instead
-
-**For COMPLEX projects (multi-service monorepo):**
-
-1. Copy the files
-2. **MUST EDIT** tsc-check.sh - find this section:
-```bash
-case "$repo" in
-    email|exports|form|frontend|projects|uploads|users|utilities|events|database)
-        echo "$repo"
-        return 0
-        ;;
-esac
-```
-
-3. Replace with USER'S actual service names:
-```bash
-case "$repo" in
-    api|web|auth|payments|notifications)  # ← User's services
-        echo "$repo"
-        return 0
-        ;;
-esac
-```
-
-4. Test manually before adding to settings.json:
-```bash
-./.claude/hooks/tsc-check.sh
-```
-
-**IMPORTANT:** If this hook fails, it will block Stop events. Only add if you're sure it works for their setup.
-
----
-
-## Integrating Agents
-
-**Agents are STANDALONE** - easiest to integrate!
-
-### Standard Agent Integration
-
-```bash
-# Copy the agent file
-cp showcase/.claude/agents/[agent-name].md \\
-   $CLAUDE_PROJECT_DIR/.claude/agents/
-```
-
-**That's it!** Agents work immediately, no configuration needed.
-
-### Check for Hardcoded Paths
-
-Some agents may reference paths. **Before copying, read the agent file and check for:**
-
-- `~/git/old-project/` → Should be `$CLAUDE_PROJECT_DIR` or `.`
-- `/root/git/project/` → Should be `$CLAUDE_PROJECT_DIR` or `.`
-- Hardcoded screenshot paths → Ask user where they want screenshots
-
-**If found, update them:**
-```bash
-sed -i 's|~/git/old-project/|.|g' $CLAUDE_PROJECT_DIR/.claude/agents/[agent].md
-sed -i 's|/root/git/.*PROJECT.*DIR|$CLAUDE_PROJECT_DIR|g' \\
-    $CLAUDE_PROJECT_DIR/.claude/agents/[agent].md
-```
-
-### Agent-Specific Notes
-
-**auth-route-tester / auth-route-debugger:**
-- Requires JWT cookie-based authentication in user's project
-- Ask: "Do you use JWT cookies for auth?"
-- If NO: "These agents are for JWT cookie auth. Skip them or want me to adapt?"
-
-**frontend-error-fixer:**
-- May reference screenshot paths
-- Ask: "Where should screenshots be saved?"
-
-**All other agents:**
-- Copy as-is, they're fully generic
-
----
-
-## Integrating Slash Commands
-
-```bash
-# Copy command file
-cp showcase/.claude/commands/[command].md \\
-   $CLAUDE_PROJECT_DIR/.claude/commands/
-```
-
-### Customize Paths
-
-Commands may reference dev docs paths. **Check and update:**
-
-**dev-docs and dev-docs-update:**
-- Look for `dev/active/` path references
-- Ask: "Where do you want dev documentation stored?"
-- Update paths in the command files
-
-**route-research-for-testing:**
-- May reference service paths
-- Ask about their API structure
-
----
-
-## Common Patterns & Best Practices
-
-### Pattern: Asking About Project Structure
-
-**DON'T assume:**
-- ❌ "I'll add this for your blog-api service"
-- ❌ "Configuring for your frontend directory"
-
-**DO ask:**
-- ✅ "What's your project structure? Monorepo or single app?"
-- ✅ "Where is your backend code located?"
-- ✅ "Do you use workspaces or have multiple services?"
-
-### Pattern: Customizing skill-rules.json
-
-**User has monorepo with workspaces:**
-```json
-{
-  "pathPatterns": [
-    "packages/*/src/**/*.ts",
-    "apps/*/src/**/*.tsx"
-  ]
-}
-```
-
-**User has Nx monorepo:**
-```json
-{
-  "pathPatterns": [
-    "apps/api/src/**/*.ts",
-    "libs/*/src/**/*.ts"
-  ]
-}
-```
-
-**User has simple structure:**
-```json
-{
-  "pathPatterns": [
-    "src/**/*.ts",
-    "backend/**/*.ts"
-  ]
-}
-```
-
-### Pattern: settings.json Integration
-
-**NEVER copy the showcase settings.json directly!**
-
-Instead, **extract and merge** the sections they need:
-
-1. Read their existing settings.json
-2. Add the hook configurations they want
-3. Preserve their existing config
-
-**Example merge:**
-```json
-{
-  // ... their existing config ...
-  "hooks": {
-    // ... their existing hooks ...
-    "UserPromptSubmit": [  // ← Add this section
+    ],
+    "Stop": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/skill-activation-prompt.sh"
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/dev-docs-stop-hook.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/dev-docs-branch-init.sh"
           }
         ]
       }
@@ -678,404 +204,38 @@ Instead, **extract and merge** the sections they need:
 
 ---
 
-## Verification Checklist
+## Integrating Agents
 
-After integration, **verify these items:**
+**Agents are STANDALONE** — easiest to integrate!
 
 ```bash
-# 1. Hooks are executable
-ls -la $CLAUDE_PROJECT_DIR/.claude/hooks/*.sh
-# Should show: -rwxr-xr-x
-
-# 2. skill-rules.json is valid JSON
-cat $CLAUDE_PROJECT_DIR/.claude/skills/skill-rules.json | jq .
-# Should parse without errors
-
-# 3. Hook dependencies installed (if TypeScript hooks)
-ls $CLAUDE_PROJECT_DIR/.claude/hooks/node_modules/
-# Should show packages if package.json exists
-
-# 4. Settings.json is valid JSON
-cat $CLAUDE_PROJECT_DIR/.claude/settings.json | jq .
-# Should parse without errors
+cp showcase/.claude/agents/[agent-name].md \
+   $CLAUDE_PROJECT_DIR/.claude/agents/
 ```
 
-**Then ask user to test:**
-- "Try editing a file in [relevant-path] - the skill should activate"
-- "Try asking me a question about [topic] - I should suggest the skill"
+**Check for hardcoded paths** in agent files and update them to match the user's project structure.
 
 ---
 
 ## Common Mistakes to Avoid
 
-### ❌ DON'T: Copy settings.json as-is
-**Why:** The Stop hooks reference non-existent services
-**DO:** Extract only UserPromptSubmit and PostToolUse sections
-
-### ❌ DON'T: Keep example service names
-**Why:** User doesn't have blog-api, auth-service, etc.
-**DO:** Ask about their actual structure and update
-
-### ❌ DON'T: Skip making hooks executable
-**Why:** Hooks won't run without execute permission
-**DO:** Always `chmod +x` after copying
-
-### ❌ DON'T: Assume monorepo structure
-**Why:** Most projects are single-service
-**DO:** Ask first, then customize
-
-### ❌ DON'T: Add all skills at once
-**Why:** Overwhelming and may not all be relevant
-**DO:** Ask which skills are relevant to their work
-
-### ❌ DON'T: Copy Stop hooks without testing
-**Why:** They can block the Stop event if they fail
-**DO:** Test manually first, only add if working
+| Mistake | Fix |
+|---------|-----|
+| Copy settings.json as-is | Extract only the sections they need |
+| Keep example service names | Ask about their actual structure |
+| Skip making hooks executable | Always `chmod +x` after copying |
+| Assume monorepo structure | Ask first, then customize |
+| Add all skills at once | Start with one relevant skill |
 
 ---
 
-## Example Integration Conversations
-
-### Example 1: Adding Backend Skill
-
-**User:** "Add the backend-dev-guidelines skill to my project"
-
-**Claude should respond:**
-```
-I'll add the backend-dev-guidelines skill. First, I need to understand
-your project structure:
-
-1. Is this a monorepo with multiple services, or a single backend application?
-2. Where is your backend code located? (e.g., src/, backend/, server/)
-3. Do you use Express.js?
-```
-
-**User:** "Single app, code is in src/api/, yes we use Express"
-
-**Claude should:**
-1. Copy the skill directory
-2. Update skill-rules.json with pathPattern: `"src/api/**/*.ts"`
-3. Verify it's copied correctly
-4. Respond:
-```
-✅ Added backend-dev-guidelines skill!
-
-Configuration:
-- Skill triggers when editing files in src/api/
-- Activated by keywords like "controller", "service", "route", "API"
-
-Try it: Edit a file in src/api/ and you should see the skill suggestion.
-```
-
-### Example 2: Setting Up Hooks
-
-**User:** "Set up the skill activation hooks"
-
-**Claude should respond:**
-```
-I'll set up the skill auto-activation system. This requires two hooks:
-1. skill-activation-prompt - Suggests skills based on your prompts
-2. post-tool-use-tracker - Tracks file changes
-
-Do you have a .claude/settings.json file already, or should I create one?
-```
-
-**User:** "I have settings.json already"
-
-**Claude should:**
-1. Read their settings.json
-2. Copy both hook files
-3. Run npm install in hooks directory
-4. Add hook configurations to their settings.json (preserving existing config)
-5. Make hooks executable
-6. Respond:
-```
-✅ Skill activation hooks installed!
-
-What I did:
-- Copied skill-activation-prompt hook
-- Copied post-tool-use-tracker hook
-- Installed dependencies
-- Added to your settings.json
-
-Test it: Ask me "help with backend development" and I should suggest
-the backend-dev-guidelines skill.
-```
-
-### Example 3: Adding Agent
-
-**User:** "Add the code-architecture-reviewer agent"
-
-**Claude should:**
-```
-The code-architecture-reviewer agent reviews code for architectural issues
-and best practices. This agent works standalone, no configuration needed.
-
-I'll copy it to your .claude/agents/ directory now.
-```
-
-**Then:**
-1. Copy the agent file
-2. Respond:
-```
-✅ Added code-architecture-reviewer agent!
-
-Use it by running the Task tool with:
-- subagent_type: "code-architecture-reviewer"
-- prompt: Description of code to review
-
-The agent will review your code and provide architectural feedback.
-```
-
-### Example 3: Adding User-Level Skill
-
-**User:** "Add the managing-dev-docs skill so I can track features across sessions"
-
-**Claude should respond:**
-```
-The managing-dev-docs skill helps track complex features across multiple sessions
-using dev docs (plan.md, context.md, tasks.md). This is a great candidate for
-user-level installation since it's useful across ALL your projects.
-
-I'll add it to your user-level skill-rules.json at ~/.claude/skills/skill-rules.json
-so it's available everywhere, not just in this project.
-```
-
-**Then:**
-1. Copy the skill directory: `cp -r showcase/.claude/skills/managing-dev-docs ~/.claude/skills/`
-2. Check if ~/.claude/skills/skill-rules.json exists
-3. If not, create the base structure
-4. Add the managing-dev-docs skill entry to ~/.claude/skills/skill-rules.json
-   (NOT to the project-level skill-rules.json)
-5. Respond:
-```
-✅ Added managing-dev-docs skill at user level!
-
-Configuration:
-- Location: ~/.claude/skills/skill-rules.json (available in ALL projects)
-- Triggers on keywords: "dev docs", "resume", "continue", "feature tracking"
-- Dev docs stored in: ~/.claude/dev-docs/
-
-This skill will now be available across all your Claude Code projects.
-
-Try it: Ask me "Do we have dev docs for this feature?" or "Resume work on [feature]"
-```
-
-### Example 4: Tech Stack Mismatch
-
-**User:** "Add the frontend-dev-guidelines skill to my Vue project"
-
-**Claude should:**
-```
-I see you're using Vue. The frontend-dev-guidelines skill is specifically
-designed for React + MUI v7. I have a few options:
-
-Option 1 (Recommended): I can create a vue-dev-guidelines skill using the
-React skill as a template. I'll adapt:
-- Component patterns for Vue (Composition API, defineComponent)
-- Replace MUI examples with your component library
-- Adapt data fetching for Vue patterns
-- Keep: File organization, performance principles, TypeScript standards
-
-Option 2: Extract only the framework-agnostic patterns (file organization,
-performance, testing) without React-specific code.
-
-Option 3: Skip it and help you create Vue guidelines from scratch.
-
-Which would you prefer?
-```
-
-**User:** "Option 1 sounds good, I use Vuetify"
-
-**Claude should:**
-1. Copy frontend-dev-guidelines as vue-dev-guidelines
-2. Go through each resource file
-3. Replace React patterns with Vue Composition API
-4. Replace MUI components with Vuetify
-5. Update skill-rules.json with Vue-specific triggers (.vue files)
-6. Respond:
-```
-✅ Created vue-dev-guidelines skill adapted for Vue 3 + Vuetify!
-
-What I changed:
-- React.FC components → Vue defineComponent
-- MUI v7 examples → Vuetify components
-- TanStack Query → Your data fetching approach
-- File patterns → .vue files
-
-What I kept:
-- File organization (features/ pattern)
-- Performance optimization strategies
-- TypeScript standards
-- Loading/error state principles
-
-Try editing a .vue file - the skill should activate.
-```
-
----
-
-## Quick Reference Tables
-
-### What Needs Customization?
-
-| Component | Tech Requirements | Customization | What to Ask | Recommended Location |
-|-----------|------------------|--------------|-------------|---------------------|
-| **skill-developer** | None | ✅ None | Copy as-is | User-level |
-| **managing-dev-docs** | None | ✅ None | "Work on features spanning multiple sessions?" | User-level |
-| **managing-dev-docs** | None | ✅ None | Copy as-is | User-level |
-| **backend-dev-guidelines** | Express/Prisma/Node | ⚠️ Paths + tech check | "Use Express/Prisma?" "Where's backend?" | Project-level |
-| **frontend-dev-guidelines** | React/MUI v7 | ⚠️⚠️ Paths + framework | "Use React/MUI v7?" "Where's frontend?" | Project-level |
-| **route-tester** | JWT cookies | ⚠️ Auth + paths | "JWT cookie auth?" | Project-level |
-| **error-tracking** | Sentry | ⚠️ Paths | "Use Sentry?" "Where's backend?" | Project-level |
-| **skill-activation-prompt** | ✅ None | Copy as-is | N/A | N/A (hook) |
-| **post-tool-use-tracker** | ✅ None | Copy as-is | N/A | N/A (hook) |
-| **tsc-check** | ⚠️⚠️⚠️ Heavy | "Monorepo or single service?" | Project-level |
-| **All agents** | ✅ Minimal | Check paths | N/A | N/A |
-| **All commands** | ⚠️ Paths | "Where for dev docs?" | N/A | N/A |
-
-### When to Recommend Skipping
-
-| Component | Skip If... |
-|-----------|-----------|
-| **tsc-check hooks** | Single-service project or different build setup |
-| **route-tester** | Not using JWT cookie authentication |
-| **frontend-dev-guidelines** | Not using React + MUI |
-| **auth agents** | Not using JWT cookie auth |
-
----
-
-## Final Tips for Claude
-
-**When user says "add everything":**
-- Start with essentials: skill-activation hooks + 1-2 relevant skills
-- Don't overwhelm them with all 5 skills + 10 agents
-- Ask what they actually need
-
-**When something doesn't work:**
-- Check verification checklist
-- Verify paths match their structure
-- Test hooks manually
-- Check for JSON syntax errors
-
-**When user is unsure:**
-- Recommend starting with just skill-activation hooks
-- Add backend OR frontend skill (whichever they use)
-- Add more later as needed
-
-**When adding user-level skills (managing-dev-docs, skill-developer):**
-- Copy skill directory to `~/.claude/skills/` (NOT project .claude/skills/)
-- Add entry to `~/.claude/skills/skill-rules.json` (NOT project skill-rules.json)
-- Explain: "This skill is now available across ALL your projects"
-- The showcase contains these as reference - users copy to their user-level location
-
-**Always explain what you're doing:**
-- Show the commands you're running
-- Explain why you're asking questions
-- Provide clear next steps after integration
-
----
-
-## Troubleshooting
-
-### FreeBSD-Specific Hook Issues
-
-If you encounter "UserPromptSubmit hook error" messages on FreeBSD systems, this is typically caused by how bash scripts handle stderr output and exit codes differently on FreeBSD.
-
-**Common Symptoms:**
-- Hook appears to execute (you see skill suggestions)
-- But you also see "UserPromptSubmit hook error" in the output
-- npm warnings like "Unknown global config 'python'" appear in logs
-
-**Root Causes:**
-
-1. **`set -e` in shell scripts** - Causes script to exit on any stderr output (like npm warnings)
-2. **npm warnings to stderr** - npm config warnings are written to stderr, triggering failure with `set -e`
-3. **Strict error handling** - FreeBSD's bash may be more strict about exit codes
-
-**Solution for skill-activation-prompt.sh:**
-
-Replace the shell script wrapper with more lenient error handling:
-
-```bash
-#!/bin/bash
-# Remove: set -e
-
-# Use user-level hooks from ~/.claude/hooks
-HOOK_DIR="$HOME/.claude/hooks"
-cd "$HOOK_DIR"
-
-# Suppress npm warnings by redirecting stderr, but keep the actual output
-cat | NPM_CONFIG_LOGLEVEL=error npx tsx skill-activation-prompt.ts 2>/dev/null || true
-```
-
-Key changes:
-- Remove `set -e` to prevent exiting on stderr
-- Add `NPM_CONFIG_LOGLEVEL=error` to suppress npm warnings
-- Redirect stderr with `2>/dev/null`
-- Add `|| true` to ensure script always exits with code 0
-
-**Solution for TypeScript file (skill-activation-prompt.ts):**
-
-Add input validation to handle edge cases:
-
-```typescript
-async function main() {
-    try {
-        // Read input from stdin
-        const input = readFileSync(0, 'utf-8').trim();
-
-        // If no input or empty input, silently exit
-        if (!input) {
-            process.exit(0);
-        }
-
-        const data: HookInput = JSON.parse(input);
-
-        // Handle case where prompt might be undefined or in a different field
-        const prompt = (data.prompt || (data as any).message || '').toLowerCase();
-
-        // If no prompt found, silently exit
-        if (!prompt) {
-            process.exit(0);
-        }
-
-        // ... rest of the code
-    } catch (error) {
-        // Log to stderr but exit cleanly
-        console.error('Error in skill-activation-prompt hook:', error);
-        process.exit(0);  // Exit with success code to avoid blocking
-    }
-}
-```
-
-**Testing the Fix:**
-
-```bash
-# Test manually with empty input
-echo '{}' | ~/.claude/hooks/skill-activation-prompt.sh
-# Should exit cleanly without errors
-
-# Test with normal input
-echo '{"prompt":"test message"}' | ~/.claude/hooks/skill-activation-prompt.sh
-# Should show skill suggestions if any match
-
-# Check exit code
-echo $?
-# Should be 0 (success)
-```
-
-**Why This Happens on FreeBSD:**
-
-FreeBSD's bash environment may have stricter default configurations or different npm global settings that cause warnings. The combination of `set -e` in shell scripts with stderr output creates a failure condition that doesn't occur on Linux systems.
-
-**Prevention:**
-
-When creating new hooks for cross-platform use:
-- Avoid `set -e` in wrapper scripts that call external tools
-- Always add `|| true` to prevent hook failures from blocking Claude Code
-- Suppress or redirect stderr from tools like npm
-- Add defensive input validation in TypeScript/JavaScript
-
----
-
-**Remember:** This is a reference library, not a working application. Your job is to help users cherry-pick and adapt components for THEIR specific project structure.
+## Quick Reference
+
+| Component | Integration Steps |
+|-----------|------------------|
+| **Skill** | Copy directory > restart Claude Code > test |
+| **Agent** | Copy .md file > check paths > done |
+| **Hook** | Copy script > chmod +x > add to settings.json |
+| **Plugin** | Use showcase as reference only; install via `/plugin` marketplace |
+
+**Always explain what you're doing and provide clear next steps after integration.**

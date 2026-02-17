@@ -2,7 +2,7 @@
 
 **A curated reference library of production-tested Claude Code infrastructure.**
 
-Born from 6+ months of real-world use and updated for Claude Code v2.1.3+, this showcase provides patterns and systems for skill auto-activation, safety guardrails, structured development workflows, and autonomous iteration — solving the core problem that skills don't activate on their own.
+Born from 6+ months of real-world use, this showcase provides patterns and systems for skill creation, safety guardrails, structured development workflows, and autonomous iteration.
 
 > **This is NOT a working application** - it's a reference library. Copy what you need into your own projects.
 
@@ -11,11 +11,12 @@ Born from 6+ months of real-world use and updated for Claude Code v2.1.3+, this 
 ## What's Inside
 
 ### Core Infrastructure
-- **Auto-activating skills** via UserPromptSubmit hooks with imperative enforcement
+- **Skills with frontmatter-based activation** (description = trigger, no hooks needed)
 - **Modular skill pattern** (500-line rule with progressive disclosure)
 - **Specialized agents** for complex tasks
 - **Dev docs system** that survives context resets
 - **Skill frontmatter hooks** (`once: true`, `PreToolUse`, `Stop`) for distributed enforcement
+- **Utility hooks** (PostToolUse tracking, SessionStart branch detection, Stop reminders)
 
 ### Official Anthropic Plugins
 - **hookify** — No-code safety guardrails via markdown config files
@@ -37,16 +38,16 @@ Born from 6+ months of real-world use and updated for Claude Code v2.1.3+, this 
 
 Read [`CLAUDE_INTEGRATION_GUIDE.md`](CLAUDE_INTEGRATION_GUIDE.md) for step-by-step integration instructions tailored for AI-assisted setup.
 
-### I want skill auto-activation
+### I want to add skills to my workflow
 
-**The breakthrough feature:** Skills that actually activate when you need them.
+**How it works:** Skills activate via their YAML frontmatter `description` field. Claude sees the description in its system prompt and invokes the skill when relevant. No hooks or config files needed.
 
 **What you need:**
-1. The skill-activation hooks (2 files)
-2. A skill or two relevant to your work
-3. 15 minutes
+1. A skill directory with a SKILL.md file
+2. Proper frontmatter with name + description
+3. That's it
 
-**[Setup Guide: .claude/hooks/README.md](.claude/hooks/README.md)**
+**[Skills Guide: .claude/skills/README.md](.claude/skills/README.md)**
 
 ### I want safety guardrails (hookify)
 
@@ -66,7 +67,7 @@ Dangerous rm command detected. Verify the path before proceeding.
 
 ### I want structured feature development
 
-7-phase workflow with specialized agents: Discovery → Exploration → Questions → Architecture → Implementation → Review → Summary.
+7-phase workflow with specialized agents: Discovery > Exploration > Questions > Architecture > Implementation > Review > Summary.
 
 **[Feature Dev Plugin: .claude/skills/feature-dev/](.claude/skills/feature-dev/)**
 
@@ -84,28 +85,36 @@ Browse the [skills catalog](.claude/skills/) and copy what you need.
 
 ---
 
-## What Makes This Different?
+## How Skill Activation Works
 
-### Imperative Skill Enforcement (v2.0)
+Skills activate via their **frontmatter description**. No hooks, no config files, no external tooling.
 
-**Problem:** Passive skill suggestions ("consider using...") get ignored ~80% of the time.
-
-**Solution:** The UserPromptSubmit hook now uses imperative language for critical/high priority skills:
-
-```
-MANDATORY SKILL INVOCATION REQUIRED
-
-You MUST use the Skill tool to invoke the following skills BEFORE generating any other response.
-This is a BLOCKING REQUIREMENT — do NOT skip, summarize, or respond without invoking these skills first.
-
-  INVOKE: Skill("managing-dev-docs")
+```yaml
+---
+name: managing-dev-docs
+description: Use when starting complex multi-step tasks, resuming work after context loss, or when user mentions committing changes. Triggers on commit, committed, done, push, implement, create, add feature, continue, resume.
+---
 ```
 
-**Result:** ~80%+ activation rate, up from ~20% with passive suggestions.
+Claude sees this in its system prompt as:
+```
+- managing-dev-docs: Use when starting complex multi-step tasks, resuming work after context loss, or when user mentions committing changes...
+```
 
-### Skill Frontmatter Hooks (v2.1.3+)
+When the user's prompt matches the description, Claude invokes the skill automatically.
 
-Skills can now define their own hooks inline, bundling enforcement with the skill itself:
+### Writing Good Descriptions
+
+The `description` field (max 1024 chars) IS the trigger mechanism:
+
+- Start with "Use when..." to frame activation conditions
+- Include specific keywords users would say
+- Mention timing ("before writing code", "after completing tasks")
+- Include synonyms (commit/committed/push/done)
+
+### Frontmatter Hooks (Optional Enhancement)
+
+Skills can self-enforce via inline hooks for additional control:
 
 ```yaml
 ---
@@ -121,22 +130,9 @@ hooks:
 ---
 ```
 
-**Supported frontmatter fields:**
-- `once: true` — Only fire once per session (prevents nagging)
-- `hooks.PreToolUse` — Run before tool execution
-- `hooks.Stop` — Run when Claude tries to finish
-
-### Tightened Trigger Keywords (v2.0)
-
-**Problem:** Broad keywords like `"code"`, `"error"`, `"done"` caused skills to fire on nearly every prompt.
-
-**Solution:** Multi-word phrases that match intent, not individual words:
-
-| Before (too broad) | After (specific) |
-|-------------------|-----------------|
-| `"error"`, `"bug"`, `"debug"` | `"sentry"`, `"captureException"`, `"error tracking"` |
-| `"done"`, `"ready"`, `"go ahead"` | `"code review"`, `"review changes"`, `"review before commit"` |
-| `"code"`, `"development"` | `"design pattern"`, `"solid principles"` |
+- **`once: true`** — Fire only once per session
+- **`PreToolUse`** — Check before file edits
+- **`Stop`** — Verify before session ends
 
 ### Two-Tier Code Review Strategy
 
@@ -170,11 +166,9 @@ skill-name/
 │   ├── error-tracking/              [project-level]
 │   ├── route-tester/                [project-level]
 │   ├── managing-dev-docs/           [user-level]
-│   ├── skill-developer/             [user-level] (7 resources)
+│   ├── skill-developer/             [user-level]
 │   ├── playwright-cli/              [user-level] (7 references)
 │   ├── refactoring-patterns/        [project-level]
-│   ├── api-development/             [project-level]
-│   ├── general-development/         [project-level]
 │   │
 │   ├── hookify/                     [plugin] Safety guardrails system
 │   │   ├── hooks/                   Python hook handlers
@@ -188,21 +182,18 @@ skill-name/
 │   │   ├── agents/                  code-explorer, code-architect, code-reviewer
 │   │   └── commands/                /feature-dev
 │   │
-│   ├── ralph-loop/                  [plugin] Autonomous iteration
-│   │   ├── hooks/                   Stop hook for completion checking
-│   │   ├── scripts/                 Setup script
-│   │   └── commands/                /ralph-loop, /cancel-ralph
-│   │
-│   └── skill-rules.json            Trigger configuration (v2.0)
+│   └── ralph-loop/                  [plugin] Autonomous iteration
+│       ├── hooks/                   Stop hook for completion checking
+│       ├── scripts/                 Setup script
+│       └── commands/                /ralph-loop, /cancel-ralph
 │
 ├── other-skills/               # Stack-specific reference skills
-│   ├── mixed-stack-guidelines/
 │   └── php-backend-dev-guidelines/
 │
-├── hooks/                      # Core automation hooks
-│   ├── skill-activation-prompt.*    (ESSENTIAL - imperative enforcement)
-│   ├── post-tool-use-tracker.sh     (ESSENTIAL)
-│   └── optional/                    Stop hooks, build checks
+├── hooks/                      # Utility hooks (non-activation)
+│   ├── post-tool-use-tracker.sh     (tracks edited files)
+│   ├── dev-docs-stop-hook.sh        (reminds about dev doc updates)
+│   └── dev-docs-branch-init.sh      (detects feature branches on session start)
 │
 ├── agents/                     # 10+ specialized agents
 │   ├── code-architecture-reviewer.md
@@ -211,8 +202,6 @@ skill-name/
 │   └── ...
 │
 └── commands/                   # Slash commands
-    ├── dev-docs.md
-    ├── dev-docs-update.md
     └── route-research-for-testing.md
 
 scripts/
@@ -240,17 +229,16 @@ scripts/
 | [**error-tracking**](.claude/skills/error-tracking/) | Observability | Sentry integration | Project |
 | [**playwright-cli**](.claude/skills/playwright-cli/) | Automation | Browser testing via Playwright | User |
 | [**refactoring-patterns**](.claude/skills/refactoring-patterns/) | Quality | Code duplication & smell analysis | Project |
-| [**api-development**](.claude/skills/api-development/) | Domain | REST/GraphQL patterns | Project |
-| [**general-development**](.claude/skills/general-development/) | Domain | Language-agnostic best practices | Project |
 
 ### Hooks
 
-| Hook | Event | Essential? | Description |
-|------|-------|-----------|-------------|
-| skill-activation-prompt | UserPromptSubmit | Yes | Imperative skill enforcement |
-| post-tool-use-tracker | PostToolUse | Yes | Track file changes |
-| hookify hooks | PreToolUse/PostToolUse/Stop | Optional | Safety guardrails (via hookify plugin) |
-| ralph-loop stop-hook | Stop | Optional | Autonomous iteration |
+| Hook | Event | Purpose |
+|------|-------|---------|
+| post-tool-use-tracker | PostToolUse | Track file changes for dev docs stop hook |
+| dev-docs-stop-hook | Stop | Remind about dev doc updates when session ends |
+| dev-docs-branch-init | SessionStart | Detect feature branches, show dev doc progress |
+| hookify hooks | PreToolUse/PostToolUse/Stop | Safety guardrails (via hookify plugin) |
+| ralph-loop stop-hook | Stop | Autonomous iteration |
 
 ### Agents (10+)
 
@@ -271,8 +259,6 @@ scripts/
 
 | Command | Purpose |
 |---------|---------|
-| /dev-docs | Create structured dev documentation |
-| /dev-docs-update | Update docs before context reset |
 | /route-research-for-testing | Research route patterns for testing |
 | /hookify | Create safety guardrail rules |
 | /feature-dev | Launch structured development workflow |
@@ -280,60 +266,31 @@ scripts/
 
 ---
 
-## Key Concepts
-
-### Hooks + skill-rules.json = Auto-Activation
-
-1. **skill-activation-prompt hook** runs on every user prompt
-2. Checks **skill-rules.json** for trigger patterns (keywords + intent regex)
-3. Critical/high priority skills get imperative "MUST invoke" enforcement
-4. Medium/low priority skills get advisory suggestions
-5. Skills load only when needed
-
-### Enforcement Hierarchy
-
-| Priority | Output Style | Example |
-|----------|-------------|---------|
-| critical | "MANDATORY... You MUST invoke" | managing-dev-docs |
-| high | "MANDATORY... You MUST invoke" | backend-dev-guidelines |
-| medium | "Consider these skills if relevant" | general-development |
-| low | "Consider these skills if relevant" | (advisory only) |
-
-### Skill Frontmatter Hooks
-
-Skills can self-enforce via inline hooks (v2.1.3+):
-- **`once: true`** — Fire only once per session
-- **`PreToolUse`** — Check before file edits
-- **`Stop`** — Verify before session ends
-
-### Dev Docs Pattern
+## Dev Docs Pattern
 
 Three-file structure that survives context resets:
 - `plan.md` - Strategic plan
 - `context.md` - Key decisions and files
 - `tasks.md` - Checklist format
 
+Stored in `~/.claude/dev-docs/{project}/{feature}/` and managed by the `managing-dev-docs` skill.
+
 ---
 
 ## Integration Workflow
 
-### Phase 1: Skill Activation (15 min)
-1. Copy skill-activation-prompt hook files
-2. Copy post-tool-use-tracker hook
-3. Copy skill-rules.json to `.claude/skills/`
-4. Update settings.json with hook paths
-5. Install hook dependencies (`npm install` in hooks dir)
+### Phase 1: Add Your First Skill (10 min)
+1. Pick ONE relevant skill from the catalog
+2. Copy skill directory to `~/.claude/skills/` (user-level) or `.claude/skills/` (project-level)
+3. Restart Claude Code
+4. Test by prompting with trigger keywords
 
-### Phase 2: Add First Skill (10 min)
-1. Pick ONE relevant skill
-2. Copy skill directory
-3. Customize path patterns if needed
-
-### Phase 3: Optional Enhancements
+### Phase 2: Optional Enhancements
 - Add hookify for safety guardrails
 - Add feature-dev for structured workflows
 - Add ralph-loop for autonomous iteration
 - Add agents for complex tasks
+- Add utility hooks (PostToolUse tracker, dev docs Stop hook)
 
 ---
 
@@ -341,7 +298,6 @@ Three-file structure that survives context resets:
 
 - **settings.json** — Example only, references example services
 - **Blog domain examples** — Teaching examples, adapt to your domain
-- **Stop hooks** — Expect specific monorepo structure, customize for yours
 - **Stack-specific skills** — Node.js/Express/React patterns, adapt for your stack
 
 ---
@@ -350,8 +306,8 @@ Three-file structure that survives context resets:
 
 | Before | After |
 |--------|-------|
-| Skills don't activate automatically | Skills suggest themselves with imperative enforcement |
-| Have to remember which skill to use | Hooks trigger skills at the right time |
+| Skills don't activate automatically | Frontmatter descriptions trigger skills contextually |
+| Have to remember which skill to use | Claude matches prompt to skill descriptions |
 | Large skills hit context limits | Modular skills stay under context limits |
 | Context resets lose project knowledge | Dev docs preserve knowledge across resets |
 | No safety guardrails | hookify prevents dangerous operations |
@@ -370,7 +326,7 @@ Three-file structure that survives context resets:
 - Contribute examples from your domain
 
 **Background:**
-This infrastructure was detailed in ["Claude Code is a Beast – Tips from 6 Months of Hardcore Use"](https://www.reddit.com/r/ClaudeAI/comments/1oivjvm/claude_code_is_a_beast_tips_from_6_months_of/) on Reddit. After hundreds of requests, this showcase was created to help the community implement these patterns.
+This infrastructure was detailed in ["Claude Code is a Beast -- Tips from 6 Months of Hardcore Use"](https://www.reddit.com/r/ClaudeAI/comments/1oivjvm/claude_code_is_a_beast_tips_from_6_months_of/) on Reddit. After hundreds of requests, this showcase was created to help the community implement these patterns.
 
 **Recommended companion skills:** See [RECOMMENDED_SKILLS.md](RECOMMENDED_SKILLS.md) for a curated list of community skills that complement this showcase, with an [install script](scripts/install-recommended-skills.sh) for standalone skills.
 
@@ -391,4 +347,4 @@ MIT License - Use freely in your projects, commercial or personal.
 - [Utility Scripts](scripts/README.md)
 - [Recommended Community Skills](RECOMMENDED_SKILLS.md)
 
-**Start here:** Copy the two essential hooks, add one skill, and see the auto-activation magic happen.
+**Start here:** Copy one skill directory, restart Claude Code, and see the activation magic happen.
