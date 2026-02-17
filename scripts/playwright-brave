@@ -1,0 +1,71 @@
+#!/usr/bin/env zsh
+# Wrapper for Playwright CLI with Brave browser extension mode.
+# Auto-selects MCP extension token based on current directory.
+#
+# Extension mode connects to your EXISTING Brave browser with all cookies/sessions.
+# No separate login or browser profile needed.
+#
+# Prerequisites:
+#   1. Brave browser installed
+#   2. "Playwright MCP Bridge" extension from Chrome Web Store
+#   3. ~/.playwright-cli/brave.config.json (see below)
+#   4. Playwright CLI skill: npx @playwright/cli install --skills
+#
+# Config file (~/.playwright-cli/brave.config.json):
+#   {
+#     "browser": {
+#       "browserName": "chromium",
+#       "launchOptions": {
+#         "executablePath": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+#         "headless": false
+#       }
+#     }
+#   }
+#
+# Token setup:
+#   Open the Playwright MCP Bridge extension in each Brave profile to get the token.
+#   Update WORK_TOKEN and PERSONAL_TOKEN below with your values.
+#
+# Usage:
+#   playwright-brave                  # open extension mode (auto-detect token)
+#   playwright-brave snapshot         # take page snapshot
+#   playwright-brave goto <url>       # navigate
+#   playwright-brave click <ref>      # click element
+#   playwright-brave fill <ref> <val> # fill input
+#   playwright-brave close            # close session
+
+BRAVE_CONFIG="$HOME/.playwright-cli/brave.config.json"
+
+# --- CONFIGURE YOUR TOKENS HERE ---
+# Get tokens from the Playwright MCP Bridge extension icon in each Brave profile.
+WORK_TOKEN="YOUR_WORK_PROFILE_TOKEN"
+PERSONAL_TOKEN="YOUR_PERSONAL_PROFILE_TOKEN"
+
+# --- CONFIGURE YOUR WORK DIRECTORY PATTERN HERE ---
+# Directories matching this pattern use the work token; all others use personal.
+WORK_DIR_PATTERN="/repos/dev[0-4]/"
+
+# Auto-detect work vs personal
+if [[ "$PWD" =~ $WORK_DIR_PATTERN ]]; then
+    TOKEN="$WORK_TOKEN"
+else
+    TOKEN="$PERSONAL_TOKEN"
+fi
+
+# First arg determines behavior
+case "${1:-open}" in
+    open)
+        # Open with extension mode + Brave config
+        shift 2>/dev/null
+        PLAYWRIGHT_MCP_EXTENSION_TOKEN="$TOKEN" \
+            npx @playwright/cli open --extension --config="$BRAVE_CONFIG" "$@"
+        ;;
+    close|close-all|kill-all|delete-data)
+        # Pass through session management commands (no token needed)
+        npx @playwright/cli "$@"
+        ;;
+    *)
+        # All other commands pass through directly
+        npx @playwright/cli "$@"
+        ;;
+esac

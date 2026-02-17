@@ -23,9 +23,9 @@ Born from 6+ months of real-world use and updated for Claude Code v2.1.3+, this 
 - **ralph-loop** — Autonomous iteration via Stop hooks until completion criteria met
 
 ### Community Patterns
-- **Browser automation** via Playwright CLI skill
+- **Browser automation** via Playwright CLI skill + Brave extension mode wrapper
 - **Comprehensive examples** using generic blog domain
-- **Utility scripts** for provider switching
+- **Utility scripts** for provider switching and browser automation
 
 **Time to integrate into your project:** 15-30 minutes
 
@@ -216,7 +216,8 @@ skill-name/
     └── route-research-for-testing.md
 
 scripts/
-└── claude-provider             # Provider switcher (Anthropic/Z.AI)
+├── claude-provider             # Provider switcher (Anthropic/Z.AI)
+└── playwright-brave            # Brave browser extension mode wrapper
 ```
 
 ---
