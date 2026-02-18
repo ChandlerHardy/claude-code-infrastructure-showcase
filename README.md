@@ -169,6 +169,7 @@ skill-name/
 │   ├── skill-developer/             [user-level]
 │   ├── playwright-cli/              [user-level] (7 references)
 │   ├── refactoring-patterns/        [project-level]
+│   ├── project-guidelines-generator/ [user-level] Meta-skill (3 resources)
 │   │
 │   ├── hookify/                     [plugin] Safety guardrails system
 │   │   ├── hooks/                   Python hook handlers
@@ -221,8 +222,9 @@ scripts/
 | [**feature-dev**](.claude/skills/feature-dev/) | Plugin | 7-phase structured development with agents | Project |
 | [**ralph-loop**](.claude/skills/ralph-loop/) | Plugin | Autonomous iteration via Stop hooks | Project |
 | [**skill-developer**](.claude/skills/skill-developer/) | Meta | Creating and managing skills | User |
+| [**project-guidelines-generator**](.claude/skills/project-guidelines-generator/) | Meta | Scan any project and generate tailored guidelines skill | User |
 | [**managing-dev-docs**](.claude/skills/managing-dev-docs/) | Productivity | Track features across sessions | User |
-| [**code-review-local**](.claude/skills/code-review-local/) | Quality | 7-agent code review pipeline | Project |
+| [**code-review-local**](.claude/skills/code-review-local/) | Quality | 8-agent code review with auto-detection of project-level guidelines | Project |
 | [**backend-dev-guidelines**](.claude/skills/backend-dev-guidelines/) | Domain | Express/Prisma/Sentry patterns | Project |
 | [**frontend-dev-guidelines**](.claude/skills/frontend-dev-guidelines/) | Domain | React/MUI v7/TypeScript | Project |
 | [**route-tester**](.claude/skills/route-tester/) | Domain | Testing authenticated routes | Project |

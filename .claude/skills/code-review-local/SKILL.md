@@ -1,11 +1,10 @@
 ---
 name: code-review-local
-description: FreeBSD-compatible code review workflow. Use when completing tasks, implementing major features, or before merging to verify work meets requirements. Triggers on code review requests, merge preparation, and feature completion. Dispatches code-reviewer agent to review implementation against plan or requirements before proceeding. This skill automatically dispatches the code-reviewer agent when invoked.
-hooks:
-  Stop:
-    - type: prompt
-      prompt: "Before finishing, check if significant code changes were made during this session. If yes and no code review was performed, remind the user that a code review is recommended before committing. Suggest using the code-architecture-reviewer agent for a quick review."
+description: Primary code review skill — use this instead of requesting-code-review. Enhanced 8-agent review with CRUD parity checking, refactoring analysis, and domain best practices on top of the standard 5-agent marketplace review. Triggers on code review requests, merge preparation, feature completion, and MR/PR prep. Dispatches code-reviewer agent to review implementation against plan or requirements.
 ---
+
+**This skill automatically dispatches the code-reviewer agent when invoked.**
+**This skill REPLACES requesting-code-review for all local projects.**
 
 # Code Review Request
 
@@ -21,6 +20,7 @@ The code-reviewer agent examines:
 5. **Production Readiness**: Migration strategy, backward compatibility, documentation
 6. **Refactoring Opportunities**: Code duplication, DRY violations, extraction candidates (via refactoring-patterns skill)
 7. **Domain-Specific Best Practices**: Language/framework patterns (via php-backend-dev-guidelines, frontend-dev-guidelines, etc.)
+8. **CRUD Path Parity**: Verifies all sibling code paths (create/read/update/delete) were updated consistently when one path changes
 
 ## Review Process
 
@@ -35,7 +35,7 @@ When invoked, this skill will:
 
 ### Enhanced Review Agents
 
-The review now includes **7 parallel agents** (instead of 5):
+The review now includes **8 parallel agents** (instead of 5):
 
 **Original Agents (from marketplace):**
 1. CLAUDE.md compliance
@@ -47,6 +47,7 @@ The review now includes **7 parallel agents** (instead of 5):
 **NEW Agents:**
 6. **Refactoring analysis** - Code duplication, DRY violations, extraction candidates
 7. **Domain best practices** - Language/framework-specific patterns (PHP, TypeScript, React, etc.)
+8. **CRUD path parity** - Verifies sibling code paths (create/read/update/delete) are updated consistently
 
 ## Usage
 
@@ -66,37 +67,48 @@ When this skill is invoked, follow these steps:
 
 ### Step 1: Load Domain Skills
 
-**BEFORE dispatching the code-reviewer agent**, identify and invoke relevant domain skills:
+**BEFORE dispatching the code-reviewer agent**, identify and invoke relevant domain skills using a three-tier resolution:
 
-**File type detection:**
+**Step 1A: Project-level skills (PREFERRED)**
+1. Check for `.claude/skills/` in the project root
+2. Look for `*-guidelines/SKILL.md` files (e.g., `triagebox-guidelines`, `myapp-guidelines`)
+3. If found, invoke these via the Skill tool — they contain patterns specific to THIS codebase
+4. Project-level skills REPLACE generic domain skills (do NOT also load generic ones)
+
+**Step 1B: Fallback to generic skills (only if NO project-level guidelines skill exists)**
 ```
 .php files → php-backend-dev-guidelines
 .ts/.tsx files → backend-dev-guidelines (if backend/) OR frontend-dev-guidelines (if frontend/)
 .js/.jsx/.vue files → frontend-dev-guidelines
-ANY files with potential duplication → refactoring-patterns
 ```
 
-**Always invoke:**
+**Step 1C: Always invoke (regardless of project vs generic)**
 - `refactoring-patterns` - Check for code duplication regardless of file type
 
-**Language-specific:**
-- `php-backend-dev-guidelines` - For PHP files
-- `frontend-dev-guidelines` - For frontend JavaScript/TypeScript
-- `backend-dev-guidelines` - For backend Node.js/TypeScript
-
-**Example:**
+**Example with project skill:**
 ```
-User: "Run code review on my PR"
+User: "Run code review on my PR" (in triagebox project)
 Assistant:
-1. Checks PR files: add_animals.php, check_duplicate_ids.php, AnimalIdValidator.php
-2. Invokes: Skill tool with "php-backend-dev-guidelines"
+1. Checks .claude/skills/ → finds triagebox-guidelines/SKILL.md
+2. Invokes: Skill tool with "triagebox-guidelines"
 3. Invokes: Skill tool with "refactoring-patterns"
-4. THEN dispatches code-reviewer agent with context loaded
+4. Does NOT invoke generic backend-dev-guidelines or frontend-dev-guidelines
+5. Dispatches code-reviewer agent with project-specific context loaded
+```
+
+**Example without project skill:**
+```
+User: "Run code review on my PR" (in project without .claude/skills/*-guidelines/)
+Assistant:
+1. Checks .claude/skills/ → no *-guidelines found
+2. Falls back: Invokes "php-backend-dev-guidelines" (for .php files)
+3. Invokes: Skill tool with "refactoring-patterns"
+4. Dispatches code-reviewer agent
 ```
 
 ### Step 2: Enhanced Review Agents
 
-When dispatching the code-reviewer agent, include **7 parallel agents**:
+When dispatching the code-reviewer agent, include **8 parallel agents**:
 
 **Agents 1-5** (from original marketplace skill):
 1. CLAUDE.md compliance check
@@ -127,26 +139,79 @@ Report format:
 
 **NEW Agent 7: Domain Best Practices**
 ```
-Task: Using domain skills loaded earlier (php-backend-dev-guidelines, etc.), check:
-- Language-specific patterns (PHP static methods, TypeScript interfaces, etc.)
-- Framework conventions (PSR-12 for PHP, React patterns, etc.)
-- Error handling patterns
+Task: Using the PROJECT-LEVEL guidelines skill (preferred) or generic domain
+skills loaded in Step 1, check language/framework-specific patterns:
+- Project-specific conventions (auth middleware, error helpers, DB access patterns)
+- Framework conventions (Fastify plugins, Next.js App Router, React patterns, etc.)
+- Error handling patterns (project's error helpers vs. raw throws)
 - Security best practices
-- Validation patterns
-- API design patterns
+- Validation patterns (Zod schemas, shared types)
+- API design patterns (response envelope, endpoint naming)
 
 Focus on:
-- Deviations from established patterns
-- Missing error handling
+- Deviations from THIS PROJECT's established patterns (not generic best practices)
+- Missing error handling using project's error helpers
 - Security vulnerabilities
-- Poor separation of concerns
+- Inconsistent use of auth guards/middleware
 
 Report format:
 - Issue description
-- Which guideline violated
+- Which project pattern/guideline is violated
 - Code location
-- Recommended fix
+- Recommended fix matching project conventions
 ```
+
+**NEW Agent 8: CRUD Path Parity**
+```
+Task: For each data entity modified in the diff, verify all sibling code paths
+were updated consistently.
+
+Step 1 — Identify entities:
+- What data collections/tables/models are being written to or read from in the diff?
+- Example: if the diff writes to `group_packer_info`, that's the entity.
+
+Step 2 — Map all code paths for each entity:
+- CREATE path: form submission handlers, `newFromData()`, `insert()`, POST handlers
+- READ path: `getData()`, `getAll*()`, list endpoints, export functions
+- UPDATE path: `updateData()`, `edit()`, PATCH/PUT handlers
+- DELETE path: `removeData()`, `delete()`, cleanup logic
+- Look in the same class/file AND in related files (e.g., save_*.php calls Class::newFromData())
+
+Step 3 — Check parity:
+- If the diff adds/modifies writes to entity X in the UPDATE path, does the CREATE path
+  also write to entity X? If not, flag it.
+- If the diff changes how entity X is read in getData(), does getAll*() and export
+  also read it the same way? If not, flag it.
+- If the diff adds validation for entity X fields in edit, does create also validate them?
+- If the diff adds cleanup/delete logic for entity X in one path, is it also handled
+  in the delete path?
+
+Step 4 — Check test coverage:
+- For each code path that touches the entity, is there a corresponding test task
+  in dev docs (tasks.md) or test file?
+- Flag any untested code path.
+
+Report format:
+- Entity name
+- Which paths were modified vs which were NOT
+- Specific file:function for each missing path
+- Risk: what breaks if this path is missed (e.g., "form submission won't create packer info")
+
+Scoring:
+- 90-100: A mutation path (create/update/delete) is missing — data loss or inconsistency
+- 75-89: A read path is stale — displays wrong data
+- 50-74: Validation or cleanup inconsistency — edge case bugs
+- <50: Minor inconsistency unlikely to cause issues
+```
+
+**Real-world example (kill-sheet bug):**
+The diff added `group_packer_info` writes in `updateData()` (edit path) but
+`newFromData()` (create path) had no packer info logic. Agent 8 would flag:
+- Entity: `group_packer_info`
+- UPDATE path: modified (writes packer info) ✓
+- CREATE path: NOT modified (no packer info writes) ✗
+- Risk: "Sell form submission won't create packer info records — data only appears after sheet edit"
+- Score: 95 (mutation path missing)
 
 ### Step 3: Scoring
 
@@ -167,9 +232,15 @@ Use the same 0-100 confidence scoring for ALL agents (including new ones):
 - Score 50-75 if maintainability/clarity issue
 - Score <50 if stylistic preference
 
+**For CRUD parity issues:**
+- Score 90-100 if a mutation path (create/update/delete) is missing — data loss or inconsistency
+- Score 75-89 if a read path is stale — displays wrong/outdated data
+- Score 50-74 if validation or cleanup inconsistency — edge case bugs
+- Score <50 if minor inconsistency unlikely to cause issues
+
 ### Step 4: Final Comment
 
-Include ALL issues (from all 7 agents) that score 80+.
+Include ALL issues (from all 8 agents) that score 80+.
 
 **Format:**
 ```markdown
@@ -207,10 +278,31 @@ Found X issues:
 **What SHOULD have happened with enhanced review:**
 1. Load php-backend-dev-guidelines (detected .php files)
 2. Load refactoring-patterns (always load)
-3. Launch 7 agents including:
+3. Launch 8 agents including:
    - **Agent 6**: Identifies 150+ lines duplicated between add_animals.php and check_duplicate_ids.php
    - **Agent 7**: Notes same validation logic in both files violates DRY
 4. Score duplication as 85 (>20 lines, 2 files, clear extraction candidate)
 5. Report: "Extract duplicate validation logic to shared AnimalIdValidator class"
 
 **Result:** Would have caught the refactoring opportunity BEFORE reviewer pointed it out
+
+### Real-World Example: Kill Sheet CRUD Parity Bug
+
+**Scenario:** Reviewing the kill-sheet-phase-1 MR (packer info on sold events)
+
+**What happened:**
+- Agents 1-7 checked code quality, refactoring, domain practices — no issues
+- MR pushed, Le Yang's review found hot_weight/base_price passed but not handled
+
+**What Agent 8 would have caught:**
+1. Entity identified: `group_packer_info`
+2. Path mapping:
+   - UPDATE: `Head_sold::updateData()` — writes to group_packer_info ✓
+   - CREATE: `Head_sold::newFromData()` — NO packer info writes ✗
+   - DELETE: `Head_sold::removeData()` — cleans up orphaned records ✓
+   - READ: `Head_sold::getData()` — reads from group_packer_info ✓
+   - READ: `Head_sold::getAllHeadSoldForGroups()` — reads stale fields from events ✗
+3. Score: 95 (mutation path missing — form submissions won't create packer info)
+4. Report: "CREATE path missing: `newFromData()` doesn't write to `group_packer_info`. Users who sell via the form won't get packer info records — only edits on sheets will work."
+
+**Result:** Would have caught the bug before MR review
