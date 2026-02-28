@@ -1,0 +1,45 @@
+{
+  "version": 2,
+  "plugins": {
+    "document-skills@anthropic-agent-skills": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chandlerhardy/.claude/plugins/cache/anthropic-agent-skills/document-skills/unknown",
+        "version": "unknown",
+        "installedAt": "2025-11-06T21:52:45.630Z",
+        "lastUpdated": "2025-11-06T21:52:45.630Z",
+        "gitCommitSha": "c74d647e56e6daa12029b6acb11a821348ad044b"
+      }
+    ],
+    "example-skills@anthropic-agent-skills": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chandlerhardy/.claude/plugins/cache/anthropic-agent-skills/example-skills/unknown",
+        "version": "unknown",
+        "installedAt": "2025-11-06T21:52:45.630Z",
+        "lastUpdated": "2025-11-06T21:52:45.630Z",
+        "gitCommitSha": "c74d647e56e6daa12029b6acb11a821348ad044b"
+      }
+    ],
+    "superpowers@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chandlerhardy/.claude/plugins/cache/claude-plugins-official/superpowers/4.3.1",
+        "version": "4.3.1",
+        "installedAt": "2026-02-17T06:16:02.598Z",
+        "lastUpdated": "2026-02-28T03:19:53.838Z",
+        "gitCommitSha": "e16d611eee14ac4c3253b4bf4c55a98d905c2e64"
+      }
+    ],
+    "feature-dev@claude-plugins-official": [
+      {
+        "scope": "user",
+        "installPath": "/Users/chandlerhardy/.claude/plugins/cache/claude-plugins-official/feature-dev/55b58ec6e564",
+        "version": "55b58ec6e564",
+        "installedAt": "2026-02-17T17:28:13.577Z",
+        "lastUpdated": "2026-02-28T03:19:52.537Z",
+        "gitCommitSha": "2cd88e7947b7382e045666abee790c7f55f669f3"
+      }
+    ]
+  }
+}

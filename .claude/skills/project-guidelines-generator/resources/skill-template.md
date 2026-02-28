@@ -73,6 +73,11 @@ description: Development guidelines for the {project-display-name} project ({sta
 ### UI Conventions
 {brief-ui-conventions}
 
+### Styling
+{brief-styling-approach}
+
+**Rule:** Use named CSS classes for any reusable visual pattern. Inline styles are only acceptable for 1-2 property overrides or truly dynamic runtime values. Extract repeated styles to the project's stylesheet.
+
 ---
 
 ## Database Guide
@@ -306,6 +311,25 @@ description: Development guidelines for the {project-display-name} project ({sta
 ```{language}
 {representative component showing conventions}
 ```
+
+---
+
+## Styling
+
+**Technology:** {SCSS, CSS Modules, Tailwind, styled-components, etc.}
+**Stylesheet location:** {path to main stylesheet or partials directory}
+**CSS compilation:** {build command or process, e.g., `maintenance/compile-css`}
+**CSS variables:** {yes/no, where defined}
+
+**Adding new styles:**
+- Create classes in {appropriate file/partial} for reusable visual patterns
+- Compile with {build command} after changes
+
+**Inline style policy:**
+- 1-2 property overrides: acceptable (e.g., `style="margin-top:1em"`)
+- 3+ properties or repeated patterns: extract to a named CSS class
+- Dynamic runtime values: acceptable as inline styles
+- Layout patterns (flex containers, grid rows): MUST be CSS classes
 
 ---
 

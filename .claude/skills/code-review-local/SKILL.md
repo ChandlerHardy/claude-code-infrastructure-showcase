@@ -147,12 +147,25 @@ skills loaded in Step 1, check language/framework-specific patterns:
 - Security best practices
 - Validation patterns (Zod schemas, shared types)
 - API design patterns (response envelope, endpoint naming)
+- Styling practices (inline styles vs. CSS classes — see below)
 
 Focus on:
 - Deviations from THIS PROJECT's established patterns (not generic best practices)
 - Missing error handling using project's error helpers
 - Security vulnerabilities
 - Inconsistent use of auth guards/middleware
+- Excessive inline styles — flag when styles should be extracted to CSS classes
+
+Inline Style Check:
+- Flag HTML elements or JS-generated markup with more than 2-3 simple inline
+  style properties (e.g., style="display:flex; align-items:center; gap:8px;
+  background:var(--shade-300); border:1px solid var(--card-border-color);
+  border-radius:0.75em; padding:12px 16px; margin-bottom:10px;" is too many)
+- Recommend extracting repeated inline styles to named CSS classes in the
+  project's stylesheet (e.g., SCSS partials, CSS modules, Tailwind classes)
+- Exception: 1-2 property overrides (e.g., style="margin-top:1em") are acceptable
+- Score 50-75 for inline styles that should be classes (maintainability issue)
+- Score 75+ if the same inline styles are repeated across multiple elements
 
 Report format:
 - Issue description

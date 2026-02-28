@@ -1,6 +1,6 @@
 ---
 name: managing-dev-docs
-description: Use when starting complex multi-step tasks or resuming work after context loss - creates three companion documents (task plan, context file, tasks checklist) to maintain continuity across sessions and prevent context loss
+description: Use when starting complex multi-step tasks, resuming work after context loss, or when user mentions committing changes. Triggers on commit, committed, done, push, implement, create, add feature, continue, resume, pick up where we left off. Creates three companion documents (task plan, context file, tasks checklist) to maintain continuity across sessions and prevent context loss. After commits, update tasks.md progress and context.md with what changed.
 ---
 
 # Managing Dev Docs

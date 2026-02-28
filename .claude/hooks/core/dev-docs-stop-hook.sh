@@ -131,7 +131,7 @@ if [ -n "$ACTIVE_FEATURES" ]; then
         echo "$ACTIVE_FEATURES" | head -5 | sed 's/^/  → /'
     fi
     echo ""
-    echo "💡 Consider running: /dev-docs-update"
+    echo "💡 Update dev docs before wrapping up"
     echo ""
     echo "💡 Enable auto-updates: touch .claude/dev-docs-auto-update"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

@@ -162,6 +162,33 @@ Registered in server.ts via app.register(conversationRoutes, { prefix: '/api/v1/
 
 ---
 
+## Styling Approach
+
+**What to find:**
+- Glob for `*.scss`, `*.css`, `*.module.css`, `*.module.scss`, `tailwind.config.*`
+- Look in `styles/`, `css/`, `scss/`, `home/scss/`, component directories
+- Grep for `style=` in templates/components to gauge inline style usage
+- Grep for `className`, `class=`, `class="` to see CSS class patterns
+
+**What to extract:**
+- Styling technology (SCSS, CSS Modules, Tailwind, styled-components, CSS-in-JS)
+- SCSS compilation process (build script path, watch command)
+- File organization (partials like `_module.scss`, variables files, theme files)
+- CSS class naming conventions (BEM, utility-first, semantic)
+- Whether the project uses CSS custom properties / CSS variables
+- Design system or component library (MUI, Bootstrap, custom, etc.)
+
+**What to document as a guideline:**
+- **Anti-inline-style rule**: New UI code should use named CSS classes, not inline styles.
+  Inline styles are acceptable only for 1-2 property overrides (e.g., `style="margin-top:1em"`)
+  or truly dynamic values computed at runtime. Repeated visual patterns (row layouts, card
+  containers, section headers) MUST be extracted into CSS classes in the project's stylesheet.
+- Where new CSS classes should be added (which file/partial)
+- How to compile/build CSS after changes
+- Any CSS variable naming conventions
+
+---
+
 ## Output Format
 
 For each pattern category, produce a block like:
