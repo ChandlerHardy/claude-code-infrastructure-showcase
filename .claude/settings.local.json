@@ -14,7 +14,6 @@
       "Bash(~/.claude/hooks/skill-activation-prompt.sh)",
       "Bash(/home/chandlerhardy/.claude/hooks/skill-activation-prompt.sh:*)"
     ],
-    "deny": [],
     "ask": []
   }
 }
