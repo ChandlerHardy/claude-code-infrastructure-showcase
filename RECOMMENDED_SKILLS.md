@@ -56,6 +56,22 @@ For skills **not** managed by the superpowers marketplace (standalone community 
 
 ---
 
+## OpenClaw Integration
+
+**For OpenClaw users:** This showcase's code-review skill is also available as an OpenClaw skill at `~/.openclaw/skills/code-review/`.
+
+The OpenClaw version provides:
+- **Same 8-agent enhanced review** (CRUD parity, refactoring, domain best practices)
+- **Project-type detection** (PHP vs TypeScript vs Python)
+- **Three-tier skill resolution** (project-level → generic → always)
+- **Integration with Claude Code infrastructure** (uses same backend/frontend/refactoring skills)
+
+**Installation:** Copy the skill from `~/.openclaw/skills/code-review/` or create it using the skill-creator guidelines.
+
+**Difference:** OpenClaw uses `skill.json` metadata instead of YAML frontmatter. The review logic is identical.
+
+---
+
 ## How This Relates to the Showcase
 
 ```
@@ -76,6 +92,10 @@ For skills **not** managed by the superpowers marketplace (standalone community 
 │  - Security (OWASP patterns)                    │
 │  - Accessibility (a11y checks)                  │
 │  - DevOps (CI/CD, Docker patterns)              │
+├─────────────────────────────────────────────────┤
+│ OpenClaw Skills (install separately)            │
+│  - code-review (8-agent enhanced review)        │
+│  - Aligns with this showcase's infrastructure   │
 └─────────────────────────────────────────────────┘
 ```
 
