@@ -36,6 +36,18 @@ The most comprehensive Claude Code skill collection. Install via the marketplace
 
 ---
 
+## Project-Specific Skills
+
+**Note:** This showcase contains **generic, reusable skills** only. Project-specific skills (like `php-backend-dev-guidelines` for Performance Beef, or `triagebox-guidelines`) should be:
+
+1. **Kept in your local project** — Add to `.claude/skills/` in your project root
+2. **NOT committed to showcase** — Work-specific patterns don't belong in a public reference
+3. **Created using project-guidelines-generator** — Use the meta-skill to scaffold custom guidelines
+
+**Why:** The showcase is for *universal* patterns (React, Node.js, testing, code review). Project-specific patterns (auth flows, business logic, company conventions) belong in your private repo.
+
+---
+
 ## Quick Install Script
 
 For skills **not** managed by the superpowers marketplace (standalone community skills), use the install script:
