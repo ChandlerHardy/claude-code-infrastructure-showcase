@@ -1,0 +1,71 @@
+#!/bin/bash
+# Global Pre-Commit Security Hook
+#
+# Scans staged files for common secret patterns before every commit.
+# Install globally so it applies to all repos on the machine.
+#
+# INSTALL:
+#   mkdir -p ~/.git-template/hooks
+#   cp pre-commit ~/.git-template/hooks/pre-commit
+#   chmod +x ~/.git-template/hooks/pre-commit
+#   git config --global init.templateDir ~/.git-template
+#
+# Apply to existing repos (run from each repo):
+#   cp ~/.git-template/hooks/pre-commit .git/hooks/pre-commit
+#
+# Or apply to all repos at once:
+#   find ~/repos -name ".git" -type d -maxdepth 2 | while read d; do
+#     cp ~/.git-template/hooks/pre-commit "$d/hooks/pre-commit"
+#   done
+
+set -euo pipefail
+
+echo "🔒 Running security scan..."
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+SECRETS_FOUND=0
+
+for file in $STAGED_FILES; do
+    if [ -f "$file" ]; then
+        CONTENT=$(git show ":$file")
+
+        # Skip markdown files (docs often contain example key patterns)
+        if [[ "$file" == *.md ]]; then
+            continue
+        fi
+
+        # OpenAI / Anthropic API keys
+        if echo "$CONTENT" | grep -iE "(['\"]|^|[^a-zA-Z])sk-[a-zA-Z0-9]{20,}(['\"]|$)" > /dev/null 2>&1; then
+            echo "❌ Potential secret found in: $file (sk- key pattern)"
+            SECRETS_FOUND=1
+        fi
+
+        # GitHub / GitLab tokens
+        if echo "$CONTENT" | grep -iE "ghp_[a-zA-Z0-9]{36,}|gho_[a-zA-Z0-9]{36,}|glpat-[a-zA-Z0-9]{20,}" > /dev/null 2>&1; then
+            echo "❌ Potential secret found in: $file (GitHub/GitLab token)"
+            SECRETS_FOUND=1
+        fi
+
+        # Generic api_key = "value" patterns
+        if echo "$CONTENT" | grep -E "api[_-]?key['\"]?\s*[:=]\s*['\"][a-zA-Z0-9]{20,}['\"]" > /dev/null 2>&1; then
+            echo "❌ Potential secret found in: $file (api_key pattern)"
+            SECRETS_FOUND=1
+        fi
+    fi
+done
+
+if [ $SECRETS_FOUND -eq 1 ]; then
+    echo ""
+    echo "❌ SECURITY SCAN FAILED: Secrets detected in staged files."
+    echo "   Remove sensitive data before committing."
+    echo "   To bypass (dangerous): git commit --no-verify"
+    exit 1
+fi
+
+echo "✅ Security scan passed - no secrets detected"
+exit 0
